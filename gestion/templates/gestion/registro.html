@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Visita - Laboratorios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl">
+        <div class="text-center mb-8">
+            <div
+                class="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-blue-600 shadow-lg mx-auto mb-4">
+                <svg class="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-1.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 Gt;0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" />
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800">Laboratorio de Cómputo</h1>
+            <p class="text-lg text-gray-500">Registro de Visitas</p>
+        </div>
+
+        <div class="relative bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
+
+            <div class="absolute top-4 right-6">
+                <a href="{% url 'finalizar' %}"
+                    class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2">
+                    Finalizar Sesión
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                </a>
+            </div>
+
+            <form action="" method="POST" class="space-y-4 pt-8">
+                {% csrf_token %}
+
+                <div class="space-y-2">
+                    <label for="id_estudiante" class="text-sm font-semibold text-gray-600 flex items-center gap-2">ID de
+                        Estudiante / Matrícula</label>
+                    <input type="text" id="id_estudiante" name="id_estudiante" placeholder="A01234567"
+                        class="w-full h-12 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                        required>
+                </div>
+                <div class="space-y-2">
+                    <label for="nombre_completo"
+                        class="text-sm font-semibold text-gray-600 flex items-center gap-2">Nombre Completo</label>
+                    <input type="text" id="nombre_completo" name="nombre_completo"
+                        class="w-full h-12 px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg cursor-not-allowed"
+                        required readonly>
+                </div>
+                <div class="space-y-2">
+                    <label for="correo" class="text-sm font-semibold text-gray-600 flex items-center gap-2">Correo
+                        Electrónico</label>
+                    <input type="email" id="correo" name="correo"
+                        class="w-full h-12 px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg cursor-not-allowed"
+                        required readonly>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div class="space-y-2">
+                        <label for="select_laboratorio" class="text-sm font-semibold text-gray-600">Laboratorio</label>
+                        <select id="select_laboratorio" name="laboratorio"
+                            class="w-full h-12 px-4 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Elige un laboratorio</option>
+                            {% for lab in laboratorios %}
+                            <option value="{{ lab.id }}">{{ lab.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label for="select_software" class="text-sm font-semibold text-gray-600">Software</label>
+                        <select id="select_software" name="software"
+                            class="w-full h-12 px-4 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Elige un software</option>
+                            {% for s in software %}
+                            <option value="{{ s.id }}">{{ s.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label for="select_pc" class="text-sm font-semibold text-gray-600">Computadora Asignada</label>
+                    <select id="select_pc" name="pc"
+                        class="w-full h-12 px-4 bg-gray-200 border border-gray-300 rounded-lg cursor-not-allowed"
+                        required disabled>
+                        <option value="">Primero elige un laboratorio</option>
+                    </select>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                        class="w-full h-14 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                        Registrar Entrada
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // TODO: Mover el JS de autocompletado y filtros dinámicos aquí
+        // (El script que ya tenías funciona, solo hay que adaptarlo a los nuevos estilos)
+        const idInput = document.getElementById('id_estudiante');
+        const nombreInput = document.getElementById('nombre_completo');
+        const correoInput = document.getElementById('correo');
+
+        idInput.addEventListener('blur', () => {
+            const estudianteId = idInput.value;
+            if (estudianteId) {
+                fetch(`/api/buscar-estudiante/?id_estudiante=${estudianteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.encontrado) {
+                            nombreInput.value = data.nombre;
+                            correoInput.value = data.correo;
+                            nombreInput.classList.add('bg-gray-200', 'cursor-not-allowed');
+                            correoInput.classList.add('bg-gray-200', 'cursor-not-allowed');
+                            nombreInput.readOnly = true;
+                            correoInput.readOnly = true;
+                        } else {
+                            nombreInput.value = '';
+                            correoInput.value = '';
+                            nombreInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                            correoInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                            nombreInput.readOnly = false;
+                            correoInput.readOnly = false;
+                            Swal.fire({
+                                title: 'Estudiante Nuevo',
+                                text: 'Este ID no está registrado. Por favor, completa tus datos para continuar.',
+                                icon: 'info',
+                                confirmButtonText: 'Entendido'
+                            });
+                        }
+                    });
+            }
+        });
+        // --- El resto del script para los filtros dinámicos va aquí ---
+        const softwareSelect = document.getElementById('select_software');
+        const labSelect = document.getElementById('select_laboratorio');
+        const pcSelect = document.getElementById('select_pc');
+
+        function actualizarSelect(selectElement, opciones, placeholder) {
+            selectElement.innerHTML = `<option value="">-- ${placeholder} --</option>`;
+            opciones.forEach(opcion => {
+                const optionTag = document.createElement('option');
+                optionTag.value = opcion.id;
+                optionTag.textContent = opcion.nombre || `PC ${opcion.numero_pc}`;
+                selectElement.appendChild(optionTag);
+            });
+        }
+
+        softwareSelect.addEventListener('change', () => {
+            const softwareId = softwareSelect.value;
+            labSelect.value = '';
+            pcSelect.innerHTML = '<option value="">-- Primero elige un laboratorio --</option>';
+            pcSelect.disabled = true;
+            pcSelect.classList.add('bg-gray-200', 'cursor-not-allowed');
+
+            if (softwareId) {
+                fetch(`/api/opciones-dinamicas/?software_id=${softwareId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        actualizarSelect(labSelect, data.laboratorios, 'Elige un lab disponible');
+                    });
+            }
+        });
+
+        labSelect.addEventListener('change', () => {
+            const labId = labSelect.value;
+            const softwareSeleccionadoAntes = softwareSelect.value;
+
+            if (labId) {
+                pcSelect.disabled = false;
+                pcSelect.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                fetch(`/api/opciones-dinamicas/?laboratorio_id=${labId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        actualizarSelect(softwareSelect, data.software, 'Elige un software de este lab');
+                        actualizarSelect(pcSelect, data.pcs, 'Elige una PC disponible');
+
+                        const softwareSigueDisponible = Array.from(softwareSelect.options).some(opt => opt.value === softwareSeleccionadoAntes);
+                        if (softwareSigueDisponible) {
+                            softwareSelect.value = softwareSeleccionadoAntes;
+                        }
+                    });
+            } else {
+                pcSelect.innerHTML = '<option value="">-- Primero elige un laboratorio --</option>';
+                pcSelect.disabled = true;
+                pcSelect.classList.add('bg-gray-200', 'cursor-not-allowed');
+            }
+        });
+
+        {% if success_message %}
+        Swal.fire({
+            title: '¡Éxito!',
+            text: '{{ success_message }}',
+            icon: 'success',
+            timer: 4000,
+            showConfirmButton: false
+        });
+        {% endif %}
+    </script>
+</body>
+
+</html>
