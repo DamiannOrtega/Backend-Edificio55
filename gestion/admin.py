@@ -9,9 +9,41 @@ class SoftwareInline(admin.TabularInline):
     verbose_name_plural = "Software Instalado"
     extra = 1
 
+class SoftwareAdmin(admin.ModelAdmin):
+    # 1. Ordena la lista alfabéticamente por nombre
+    ordering = ('nombre',)
+
+    # 2. Añade un filtro por laboratorios
+    list_filter = ('laboratorios',)
+
+    # 3. Mejora las columnas que se muestran en la lista
+    list_display = ('nombre', 'version', 'get_laboratorios')
+
+    # Opcional: añade una barra de búsqueda
+    search_fields = ('nombre',)
+
+    # Esta función crea el texto para la columna "Laboratorios"
+    def get_laboratorios(self, obj):
+        # Une los nombres de todos los laboratorios asociados con una coma
+        return ", ".join([lab.nombre for lab in obj.laboratorios.all()])
+    get_laboratorios.short_description = 'Instalado en' # Nombre de la columna
+
 class PCInline(admin.TabularInline):
     model = PC
     extra = 1
+
+class PCAdmin(admin.ModelAdmin):
+    # Columnas a mostrar en la lista
+    list_display = ('__str__', 'laboratorio', 'estado')
+
+    # Panel de filtro a la derecha
+    list_filter = ('laboratorio', 'estado')
+
+    # Orden por defecto: primero por laboratorio, luego por número de PC
+    ordering = ('laboratorio', 'numero_pc')
+
+    # Opcional: añade una barra de búsqueda
+    search_fields = ('numero_pc',)
 
 class LaboratorioAdmin(admin.ModelAdmin):
     inlines = [SoftwareInline, PCInline]
@@ -45,8 +77,8 @@ class VisitaAdmin(admin.ModelAdmin):
 
 # --- Registramos todos los modelos con sus clases personalizadas ---
 admin.site.register(Laboratorio, LaboratorioAdmin)
-admin.site.register(Software)
-admin.site.register(PC)
+admin.site.register(Software, SoftwareAdmin)
+admin.site.register(PC, PCAdmin)
 admin.site.register(Estudiante)
 admin.site.register(ReservaClase, ReservaClaseAdmin)
 admin.site.register(Visita, VisitaAdmin) # <-- Registramos Visita con su nueva clase personalizada

@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,9 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-MX'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
@@ -133,3 +134,66 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
+# settings.py (al final del archivo)
+
+JAZZMIN_SETTINGS = {
+    # Título de la ventana (se verá en la pestaña del navegador)
+    "site_title": "Admin Lab",
+
+    # Título en la barra de navegación (se puede usar un logo)
+    "site_header": "Laboratorios",
+
+    # Logo para la página de login
+    "login_logo": None, # O pon la ruta a tu logo ej. 'img/logo.png'
+
+    # Logo para la barra de navegación
+    "site_logo": None, # O pon la ruta a tu logo ej. 'img/logo.png'
+
+    # Texto de bienvenida en la página principal
+    "welcome_sign": "Bienvenido al panel de administración del Sistema de Laboratorios",
+
+    # Copyright en el footer
+    "copyright": "Universidad XYZ",
+
+    # Iconos para los modelos de tu app "gestion"
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "gestion.Estudiante": "fas fa-user-graduate",
+        "gestion.Laboratorio": "fas fa-building",
+        "gestion.PC": "fas fa-desktop",
+        "gestion.ReservaClase": "fas fa-calendar-alt",
+        "gestion.Software": "fas fa-compact-disc",
+        "gestion.Visita": "fas fa-history",
+    },
+
+    # Opciones de la UI
+    "ui_tweaks": {
+        "navbar_small_text": False,
+        "footer_small_text": False,
+        "body_small_text": False,
+        "brand_small_text": False,
+        "brand_colour": "navbar-dark",
+        "accent": "accent-primary",
+        "navbar": "navbar-dark",
+        "no_navbar_border": False,
+        "sidebar": "sidebar-dark-primary",
+        "sidebar_nav_small_text": False,
+        "sidebar_disable_expand": False,
+        "sidebar_nav_child_indent": False,
+        "sidebar_nav_compact_style": False,
+        "sidebar_nav_legacy_style": False,
+        "sidebar_nav_flat_style": False,
+        "theme": "darkly", # Puedes probar otros temas como "flatly", "cerulean", "lumen", etc.
+        "button_classes": {
+            "primary": "btn-primary",
+            "secondary": "btn-secondary",
+            "info": "btn-info",
+            "warning": "btn-warning",
+            "danger": "btn-danger",
+            "success": "btn-success"
+        }
+    }
+}
