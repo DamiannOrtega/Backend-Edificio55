@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,7 +51,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'sistema_labs.urls'
@@ -58,10 +58,11 @@ ROOT_URLCONF = 'sistema_labs.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
+            'context_processors': [ # <-- LA POSICIÓN CORRECTA ES AQUÍ DENTRO
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -123,6 +124,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -138,6 +142,7 @@ CORS_ALLOWED_ORIGINS = [
 # settings.py (al final del archivo)
 
 JAZZMIN_SETTINGS = {
+
     # Título de la ventana (se verá en la pestaña del navegador)
     "site_title": "Admin Lab",
 
@@ -145,16 +150,20 @@ JAZZMIN_SETTINGS = {
     "site_header": "Laboratorios",
 
     # Logo para la página de login
-    "login_logo": None, # O pon la ruta a tu logo ej. 'img/logo.png'
+    "login_logo": "img/logo.svg",
 
     # Logo para la barra de navegación
-    "site_logo": None, # O pon la ruta a tu logo ej. 'img/logo.png'
+    "site_logo": "img/logo.svg",
 
     # Texto de bienvenida en la página principal
-    "welcome_sign": "Bienvenido al panel de administración del Sistema de Laboratorios",
+    "welcome_sign": "Bienvenido al panel de administración del Sistema de Laboratorios del Edificio 55",
 
     # Copyright en el footer
-    "copyright": "Universidad XYZ",
+    "copyright": "Universidad Autónoma de Aguascalientes",
+
+    "custom_css": "css/admin_fix.css",
+    
+    # Enlaces personalizados en la barra de navegación
 
     # Iconos para los modelos de tu app "gestion"
     "icons": {
@@ -197,3 +206,27 @@ JAZZMIN_SETTINGS = {
         }
     }
 }
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo, cambiar a False en producción
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

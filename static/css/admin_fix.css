@@ -1,0 +1,48 @@
+
+
+/* Forzar que los labels estén arriba de los inputs */
+.form-group label {
+  display: block !important;
+  float: none !important;
+  width: auto !important;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Cada form-group en columna */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+/* Ajustar datetime widgets (fecha + hora + enlaces Hoy/Ahora) */
+.form-group .datetime {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Alinear selects con sus íconos (lupa, +, x) */
+.related-widget-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Separar filas grandes (como Inicio / Final, Creador / Calendario, etc.) */
+fieldset .row {
+  margin-bottom: 1.5rem;
+}
+
+/* Los elementos con clase .row dentro de fieldsets deben comportarse en grid */
+fieldset .row > div[class*="col"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-logo img {
+    max-width: 200px; 
+    height: auto;      /* Mantiene la proporción del logo */
+}
