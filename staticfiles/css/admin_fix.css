@@ -1,4 +1,4 @@
-/* static/css/admin_fix.css */
+
 
 /* Forzar que los labels estén arriba de los inputs */
 .form-group label {
@@ -40,4 +40,9 @@ fieldset .row {
 fieldset .row > div[class*="col"] {
   display: flex;
   flex-direction: column;
+}
+
+.login-logo img {
+    max-width: 200px; 
+    height: auto;      /* Mantiene la proporción del logo */
 }

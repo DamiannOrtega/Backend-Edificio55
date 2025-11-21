@@ -6,6 +6,10 @@ from datetime import datetime, timedelta
 class Laboratorio(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField(blank=True, null=True) # blank=True y null=True hacen que no sea obligatorio
+    
+    class Meta:
+        ordering = ['nombre']  # Ordenar alfabéticamente por nombre
+    
     def __str__(self):
         return self.nombre
 
@@ -87,6 +91,7 @@ class DiaSemana(models.Model):
     class Meta:
         verbose_name = "Día de la Semana"
         verbose_name_plural = "Días de la Semana"
+        ordering = ['codigo']  # Ordenamiento por defecto (se sobrescribe en el admin cuando es necesario)
 
 class SerieReserva(models.Model):
     """ Representa una serie de reservas recurrentes, ej. 'Clase de Redes L-V 10-11' """
@@ -119,9 +124,13 @@ class SerieReserva(models.Model):
         return self.nombre
     
     def get_dias_display(self):
-        """Retorna los días de la semana en formato legible"""
-        dias = self.dias_semana.all().order_by('codigo')
-        return ', '.join([dia.nombre for dia in dias])
+        """Retorna los días de la semana en formato legible, ordenados: Domingo, Lunes, Martes, etc."""
+        # Mapeo de orden: Domingo=0, Lunes=1, Martes=2, Miércoles=3, Jueves=4, Viernes=5, Sábado=6
+        orden_dias = {'D': 0, 'L': 1, 'M': 2, 'X': 3, 'J': 4, 'V': 5, 'S': 6}
+        dias = list(self.dias_semana.all())
+        # Ordenar según el mapeo
+        dias_ordenados = sorted(dias, key=lambda d: orden_dias.get(d.codigo, 99))
+        return ', '.join([dia.nombre for dia in dias_ordenados])
     
     def get_dias_codigos(self):
         """Retorna los códigos de los días para el procesamiento"""
@@ -179,3 +188,47 @@ class Visita(models.Model):
 
     def __str__(self):
         return f'Visita de {self.estudiante.nombre_completo} en {self.pc}'
+
+# Modelo para los mantenimientos de PCs
+class Mantenimiento(models.Model):
+    """Modelo para registrar los mantenimientos de las PCs"""
+    pc = models.ForeignKey(PC, on_delete=models.CASCADE, related_name='mantenimientos')
+    descripcion = models.TextField(blank=True, null=True, help_text="Descripción detallada del mantenimiento")
+    fecha_inicio = models.DateTimeField(help_text="Fecha y hora de inicio del mantenimiento")
+    fecha_fin = models.DateTimeField(null=True, blank=True, help_text="Fecha y hora de fin del mantenimiento")
+    
+    class Meta:
+        verbose_name = "Mantenimiento"
+        verbose_name_plural = "Mantenimientos"
+        ordering = ['-fecha_inicio']
+    
+    def __str__(self):
+        return f'Mantenimiento de {self.pc} - {self.fecha_inicio.strftime("%Y-%m-%d %H:%M")}'
+    
+    def get_laboratorio(self):
+        """Retorna el laboratorio al que pertenece la PC"""
+        return self.pc.laboratorio
+    get_laboratorio.short_description = 'Laboratorio'
+    
+    def get_estado(self):
+        """Retorna el estado del mantenimiento: Activo si no tiene fecha_fin, Terminado si tiene fecha_fin"""
+        if self.fecha_fin:
+            return "Terminado"
+        return "Activo"
+    get_estado.short_description = 'Estado'
+    
+    def get_duracion(self):
+        """Retorna la duración del mantenimiento si está terminado"""
+        if self.fecha_fin:
+            duracion = self.fecha_fin - self.fecha_inicio
+            dias = duracion.days
+            horas = int((duracion.total_seconds() % 86400) // 3600)
+            minutos = int((duracion.total_seconds() % 3600) // 60)
+            if dias > 0:
+                return f"{dias}d {horas}h {minutos}m"
+            elif horas > 0:
+                return f"{horas}h {minutos}m"
+            else:
+                return f"{minutos}m"
+        return "En curso"
+    get_duracion.short_description = 'Duración'

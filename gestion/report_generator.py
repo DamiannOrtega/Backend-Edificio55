@@ -96,6 +96,10 @@ class ReportGenerator:
         
         # Tablas detalladas
         story.extend(self._create_detailed_tables(filters))
+        story.append(PageBreak())
+        
+        # Sección de todas las visitas
+        story.extend(self._create_all_visits_section(filters))
         
         # Construir el PDF
         doc.build(story)
@@ -336,6 +340,153 @@ class ReportGenerator:
         
         return elements
 
+    def _create_all_visits_section(self, filters):
+        """Crear sección con todas las visitas"""
+        elements = []
+        
+        title = Paragraph("REGISTRO COMPLETO DE VISITAS", self.styles['CustomSubtitle'])
+        elements.append(title)
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Obtener todas las visitas filtradas
+        visitas = self._get_all_visits_for_pdf(filters)
+        
+        if not visitas:
+            no_data = Paragraph("No hay visitas registradas para los filtros seleccionados.", self.styles['CustomNormal'])
+            elements.append(no_data)
+            return elements
+        
+        # Crear tabla con todas las visitas
+        # Dividir en páginas si hay muchas visitas
+        visitas_per_page = 20  # Número de visitas por página
+        
+        for i in range(0, len(visitas), visitas_per_page):
+            page_visitas = visitas[i:i + visitas_per_page]
+            
+            # Encabezados de la tabla
+            visits_data = [['Estudiante', 'PC', 'Laboratorio', 'Software', 'Fecha Inicio', 'Fecha Fin', 'Duración']]
+            
+            for visita in page_visitas:
+                # Truncar nombres largos para que quepan en la tabla
+                estudiante = visita['estudiante'][:25] + "..." if len(visita['estudiante']) > 25 else visita['estudiante']
+                software = visita['software'][:20] + "..." if len(visita['software']) > 20 else visita['software']
+                
+                fecha_inicio = visita['fecha_inicio']
+                fecha_fin = visita['fecha_fin'] if visita['fecha_fin'] else 'En curso'
+                duracion = visita['duracion'] if visita['duracion'] else '-'
+                
+                visits_data.append([
+                    estudiante,
+                    visita['pc'],
+                    visita['laboratorio'],
+                    software,
+                    fecha_inicio,
+                    fecha_fin,
+                    duracion
+                ])
+            
+            # Crear tabla - ajustar anchos para que quepan en la página A4
+            # Ancho total disponible: ~7.5 inch (A4 width - margins)
+            visits_table = Table(visits_data, colWidths=[1.3*inch, 0.6*inch, 0.9*inch, 1*inch, 1.1*inch, 1.1*inch, 0.7*inch])
+            visits_table.setStyle(TableStyle([
+                # Encabezado
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Estudiante alineado a la izquierda
+                ('ALIGN', (3, 1), (3, -1), 'LEFT'),  # Software alineado a la izquierda
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('TOPPADDING', (0, 0), (-1, 0), 12),
+                # Filas alternadas
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#ffffff'), colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e5e7eb')),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 1), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+            ]))
+            
+            elements.append(visits_table)
+            
+            # Agregar información de paginación si hay más visitas
+            if i + visitas_per_page < len(visitas):
+                elements.append(Spacer(1, 0.2*inch))
+                page_info = Paragraph(
+                    f"<i>Mostrando visitas {i+1} a {min(i+visitas_per_page, len(visitas))} de {len(visitas)} totales</i>",
+                    self.styles['CustomNormal']
+                )
+                elements.append(page_info)
+                elements.append(PageBreak())
+        
+        # Información final
+        elements.append(Spacer(1, 0.3*inch))
+        total_info = Paragraph(
+            f"<b>Total de visitas mostradas: {len(visitas)}</b>",
+            self.styles['CustomNormal']
+        )
+        elements.append(total_info)
+        
+        return elements
+
+    def _get_all_visits_for_pdf(self, filters):
+        """Obtener todas las visitas para el PDF"""
+        try:
+            filters_q = Q()
+            if filters.get('date_from'):
+                filters_q &= Q(fecha_hora_inicio__date__gte=filters['date_from'])
+            if filters.get('date_to'):
+                filters_q &= Q(fecha_hora_inicio__date__lte=filters['date_to'])
+            if filters.get('laboratory') and filters['laboratory'] != 'all':
+                filters_q &= Q(pc__laboratorio__id=filters['laboratory'])
+            if filters.get('software') and filters['software'] != 'all':
+                filters_q &= Q(software_utilizado__id=filters['software'])
+            
+            # Obtener todas las visitas (sin límite para el PDF)
+            visitas = Visita.objects.filter(filters_q).select_related(
+                'estudiante', 'pc__laboratorio', 'software_utilizado'
+            ).order_by('-fecha_hora_inicio')
+            
+            data = []
+            for visita in visitas:
+                try:
+                    fecha_inicio_local = timezone.localtime(visita.fecha_hora_inicio)
+                    fecha_fin_local = timezone.localtime(visita.fecha_hora_fin) if visita.fecha_hora_fin else None
+                    
+                    # Calcular duración
+                    duracion = None
+                    if fecha_fin_local:
+                        diff = fecha_fin_local - fecha_inicio_local
+                        horas = int(diff.total_seconds() // 3600)
+                        minutos = int((diff.total_seconds() % 3600) // 60)
+                        if horas > 0:
+                            duracion = f"{horas}h {minutos}m"
+                        else:
+                            duracion = f"{minutos}m"
+                    
+                    data.append({
+                        'id': visita.id,
+                        'estudiante': visita.estudiante.nombre_completo if visita.estudiante else 'N/A',
+                        'laboratorio': visita.pc.laboratorio.nombre if visita.pc and visita.pc.laboratorio else 'N/A',
+                        'pc': str(visita.pc) if visita.pc else 'N/A',
+                        'software': visita.software_utilizado.nombre if visita.software_utilizado else 'N/A',
+                        'fecha_inicio': fecha_inicio_local.strftime('%d/%m/%Y %H:%M'),
+                        'fecha_fin': fecha_fin_local.strftime('%d/%m/%Y %H:%M') if fecha_fin_local else None,
+                        'duracion': duracion,
+                        'estado': 'En uso' if visita.fecha_hora_fin is None else 'Terminado'
+                    })
+                except Exception as e:
+                    # Continuar con la siguiente visita si hay un error
+                    continue
+            
+            return data
+        except Exception as e:
+            # Retornar lista vacía si hay un error
+            return []
+
     def generate_excel_report(self, filters, output_path=None):
         """Generar reporte Excel con excelente presentación"""
         if output_path is None:
@@ -357,6 +508,9 @@ class ReportGenerator:
             
             # Hoja 5: Datos Detallados
             self._create_excel_detailed_sheet(writer, filters)
+            
+            # Hoja 6: Registro Completo de Visitas
+            self._create_excel_all_visits_sheet(writer, filters)
         
         if isinstance(output_path, BytesIO):
             output_path.seek(0)
@@ -494,6 +648,43 @@ class ReportGenerator:
             
             df = pd.DataFrame(visits_data)
             df.to_excel(writer, sheet_name='Datos Detallados', index=False)
+
+    def _create_excel_all_visits_sheet(self, writer, filters):
+        """Crear hoja con todas las visitas (similar a la sección del PDF)"""
+        # Obtener todas las visitas filtradas
+        visitas = self._get_all_visits_for_pdf(filters)
+        
+        if visitas:
+            visits_data = []
+            for visita in visitas:
+                visits_data.append({
+                    'ID': visita['id'],
+                    'Estudiante': visita['estudiante'],
+                    'PC': visita['pc'],
+                    'Laboratorio': visita['laboratorio'],
+                    'Software': visita['software'],
+                    'Fecha Inicio': visita['fecha_inicio'],
+                    'Fecha Fin': visita['fecha_fin'] or 'En curso',
+                    'Duración': visita['duracion'] or '-',
+                    'Estado': visita['estado']
+                })
+            
+            df = pd.DataFrame(visits_data)
+            df.to_excel(writer, sheet_name='Registro Completo de Visitas', index=False)
+            
+            # Formatear la hoja
+            worksheet = writer.sheets['Registro Completo de Visitas']
+            for column in worksheet.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 30)
+                worksheet.column_dimensions[column_letter].width = adjusted_width
 
     # Métodos auxiliares para obtener datos
     def _get_filtered_stats(self, filters):
@@ -822,5 +1013,6 @@ class ReportGenerator:
                 return category
         
         return 'Otros'
+
 
 

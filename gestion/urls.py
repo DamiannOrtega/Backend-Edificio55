@@ -11,6 +11,10 @@ urlpatterns = [
     path('api/registrar-visita/', views.registrar_visita_api, name='api_registrar_visita'),
     path('api/finalizar-visita/', views.finalizar_visita_api, name='api_finalizar_visita'),
     
+    # APIs de autenticación para reportes
+    path('api/admin/login/', views.api_admin_login, name='api_admin_login'),
+    path('api/admin/verify/', views.api_admin_verify, name='api_admin_verify'),
+    
     # APIs para dashboard React
     path('api/dashboard/stats/', views.api_dashboard_stats, name='api_dashboard_stats'),
     path('api/dashboard/lab-usage/', views.api_lab_usage, name='api_lab_usage'),

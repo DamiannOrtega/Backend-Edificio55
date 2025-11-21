@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 # ASÍ DEBE QUEDAR
 from .models import Laboratorio, Software, PC, Estudiante, Visita, ReservaClase, SerieReserva
 from django.utils import timezone
@@ -7,6 +7,100 @@ from django.db.models import Count, Q
 from datetime import timedelta
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, get_user_model
+from django.core import signing
+from django.core.signing import BadSignature, SignatureExpired
+from functools import wraps
+
+
+User = get_user_model()
+ADMIN_TOKEN_MAX_AGE = 60 * 60 * 8  # 8 horas
+
+
+def _get_admin_token(request):
+    """Extrae el token del encabezado Authorization."""
+    auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+    if auth_header.startswith('Token '):
+        return auth_header.split(' ', 1)[1].strip()
+    return None
+
+
+def admin_required_api(view_func):
+    """Decorator para proteger APIs que requieren sesión de admin."""
+
+    @wraps(view_func)
+    def _wrapped(request, *args, **kwargs):
+        token = _get_admin_token(request)
+        if not token:
+            return JsonResponse({'error': 'No autorizado'}, status=401)
+
+        try:
+            payload = signing.loads(token, max_age=ADMIN_TOKEN_MAX_AGE)
+            user_id = payload.get('user_id')
+            user = User.objects.filter(id=user_id, is_staff=True).first()
+            if not user:
+                return JsonResponse({'error': 'No autorizado'}, status=401)
+            request.admin_user = user
+        except (BadSignature, SignatureExpired):
+            return JsonResponse({'error': 'Token inválido o expirado'}, status=401)
+
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped
+
+
+@csrf_exempt
+def api_admin_login(request):
+    """Inicia sesión para usuarios administradores o staff."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
+        data = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        data = {}
+
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return JsonResponse({'error': 'Usuario y contraseña son requeridos'}, status=400)
+
+    user = authenticate(request, username=username, password=password)
+    if user is None or not user.is_staff:
+        return JsonResponse({'error': 'Credenciales inválidas'}, status=401)
+
+    token = signing.dumps({'user_id': user.id, 'username': user.username})
+    return JsonResponse({
+        'token': token,
+        'user': {
+            'username': user.username,
+            'email': user.email,
+        }
+    })
+
+
+@csrf_exempt
+def api_admin_verify(request):
+    """Verifica si el token de administrador es válido."""
+    token = _get_admin_token(request)
+    if not token:
+        return JsonResponse({'valid': False}, status=401)
+
+    try:
+        payload = signing.loads(token, max_age=ADMIN_TOKEN_MAX_AGE)
+        user = User.objects.filter(id=payload.get('user_id'), is_staff=True).first()
+        if not user:
+            return JsonResponse({'valid': False}, status=401)
+        return JsonResponse({
+            'valid': True,
+            'user': {
+                'username': user.username,
+                'email': user.email,
+            }
+        })
+    except (BadSignature, SignatureExpired):
+        return JsonResponse({'valid': False}, status=401)
 
 
 def pagina_registro(request):
@@ -458,6 +552,7 @@ def api_recent_visits(request):
 
 # APIs para reportes filtrados
 @csrf_exempt
+@admin_required_api
 def api_reports_filtered_stats(request):
     """API para obtener estadísticas filtradas para reportes"""
     
@@ -526,6 +621,7 @@ def api_reports_filtered_stats(request):
 
 
 @csrf_exempt
+@admin_required_api
 def api_reports_lab_usage(request):
     """API para obtener uso por laboratorio filtrado"""
     
@@ -575,6 +671,7 @@ def api_reports_lab_usage(request):
 
 
 @csrf_exempt
+@admin_required_api
 def api_reports_software_usage(request):
     """API para obtener uso de software filtrado"""
     
@@ -616,6 +713,7 @@ def api_reports_software_usage(request):
 
 
 @csrf_exempt
+@admin_required_api
 def api_reports_daily_trend(request):
     """API para obtener tendencia diaria filtrada"""
     
@@ -660,6 +758,7 @@ def api_reports_daily_trend(request):
 
 
 @csrf_exempt
+@admin_required_api
 def api_reports_top_users(request):
     """API para obtener usuarios más activos filtrados"""
     
@@ -716,6 +815,7 @@ def api_reports_top_users(request):
 
 
 @csrf_exempt
+@admin_required_api
 def api_reports_laboratories_list(request):
     """API para obtener lista de laboratorios para filtros"""
     
@@ -728,6 +828,7 @@ def api_reports_laboratories_list(request):
 
 
 @csrf_exempt
+@admin_required_api
 def api_reports_software_list(request):
     """API para obtener lista de software para filtros"""
     
@@ -741,56 +842,120 @@ def api_reports_software_list(request):
 
 # APIs para exportación de reportes
 @csrf_exempt
+@admin_required_api
 def api_export_pdf(request):
     """API para exportar reporte a PDF"""
     
     try:
         from .report_generator import ReportGenerator
-        from django.http import HttpResponse
+        from django.http import HttpResponse, JsonResponse
         import json
+        import traceback
         
         # Obtener filtros del request
         filters = {}
         if request.method == 'GET':
-            filters = dict(request.GET)
+            filters = request.GET.dict()
         elif request.method == 'POST':
-            data = json.loads(request.body)
-            filters = data.get('filters', {})
+            try:
+                data = json.loads(request.body)
+                filters = data.get('filters', {})
+            except:
+                filters = {}
         
-        # Generar PDF
+        # Normalizar nombres de filtros (camelCase a snake_case)
+        normalized_filters = {}
+        normalized_filters['date_from'] = filters.get('dateFrom') or filters.get('date_from')
+        normalized_filters['date_to'] = filters.get('dateTo') or filters.get('date_to')
+        normalized_filters['period'] = filters.get('period', 'custom')
+        normalized_filters['laboratory'] = filters.get('laboratory', 'all')
+        normalized_filters['software'] = filters.get('software', 'all')
+        normalized_filters['userType'] = filters.get('userType', 'all')
+        
+        # Si hay un período predefinido, calcular las fechas
+        if normalized_filters['period'] != 'custom' and not normalized_filters['date_from']:
+            from datetime import datetime, timedelta
+            today = datetime.now().date()
+            period_map = {
+                'monthly': timedelta(days=30),
+                'bimonthly': timedelta(days=60),
+                'quarterly': timedelta(days=90),
+                'semiannual': timedelta(days=180),
+                'annual': timedelta(days=365)
+            }
+            if normalized_filters['period'] in period_map:
+                normalized_filters['date_from'] = (today - period_map[normalized_filters['period']]).strftime('%Y-%m-%d')
+                normalized_filters['date_to'] = today.strftime('%Y-%m-%d')
+        
+        # Generar PDF con filtros normalizados
         generator = ReportGenerator()
-        pdf_content = generator.generate_pdf_report(filters)
+        pdf_content = generator.generate_pdf_report(normalized_filters)
         
         # Crear respuesta HTTP
         response = HttpResponse(pdf_content, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="reporte_laboratorios_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
         
         return response
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Error al generar PDF: {str(e)}")
+        print(f"Traceback: {error_trace}")
+        return JsonResponse({'error': str(e), 'traceback': error_trace}, status=500)
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
 @csrf_exempt
+@admin_required_api
 def api_export_excel(request):
     """API para exportar reporte a Excel"""
     
     try:
         from .report_generator import ReportGenerator
-        from django.http import HttpResponse
+        from django.http import HttpResponse, JsonResponse
         import json
+        import traceback
         
         # Obtener filtros del request
         filters = {}
         if request.method == 'GET':
-            filters = dict(request.GET)
+            filters = request.GET.dict()
         elif request.method == 'POST':
-            data = json.loads(request.body)
-            filters = data.get('filters', {})
+            try:
+                data = json.loads(request.body)
+                filters = data.get('filters', {})
+            except:
+                filters = {}
         
-        # Generar Excel
+        # Normalizar nombres de filtros (camelCase a snake_case)
+        normalized_filters = {}
+        normalized_filters['date_from'] = filters.get('dateFrom') or filters.get('date_from')
+        normalized_filters['date_to'] = filters.get('dateTo') or filters.get('date_to')
+        normalized_filters['period'] = filters.get('period', 'custom')
+        normalized_filters['laboratory'] = filters.get('laboratory', 'all')
+        normalized_filters['software'] = filters.get('software', 'all')
+        normalized_filters['userType'] = filters.get('userType', 'all')
+        
+        # Si hay un período predefinido, calcular las fechas
+        if normalized_filters['period'] != 'custom' and not normalized_filters['date_from']:
+            from datetime import datetime, timedelta
+            today = datetime.now().date()
+            period_map = {
+                'monthly': timedelta(days=30),
+                'bimonthly': timedelta(days=60),
+                'quarterly': timedelta(days=90),
+                'semiannual': timedelta(days=180),
+                'annual': timedelta(days=365)
+            }
+            if normalized_filters['period'] in period_map:
+                normalized_filters['date_from'] = (today - period_map[normalized_filters['period']]).strftime('%Y-%m-%d')
+                normalized_filters['date_to'] = today.strftime('%Y-%m-%d')
+        
+        # Generar Excel con filtros normalizados
         generator = ReportGenerator()
-        excel_content = generator.generate_excel_report(filters)
+        excel_content = generator.generate_excel_report(normalized_filters)
         
         # Crear respuesta HTTP
         response = HttpResponse(
@@ -800,6 +965,12 @@ def api_export_excel(request):
         response['Content-Disposition'] = f'attachment; filename="reporte_laboratorios_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
         
         return response
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Error al generar Excel: {str(e)}")
+        print(f"Traceback: {error_trace}")
+        return JsonResponse({'error': str(e), 'traceback': error_trace}, status=500)
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

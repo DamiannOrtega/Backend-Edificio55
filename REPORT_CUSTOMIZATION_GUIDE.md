@@ -616,3 +616,4 @@ def generate_pdf_report(self, filters, output_path=None):
 **Con esta guía puedes personalizar completamente los reportes según tus necesidades específicas sin afectar la funcionalidad principal del sistema.**
 
 
+

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-g0--eci@)-s7x+ymp6l@9l+)k$4zg0m((pq%9b*la=vu)km!!*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -164,6 +164,8 @@ JAZZMIN_SETTINGS = {
     "custom_css": "css/admin_fix.css",
     
     # Enlaces personalizados en la barra de navegación
+    "custom_links": {
+    },
 
     # Iconos para los modelos de tu app "gestion"
     "icons": {
@@ -176,6 +178,7 @@ JAZZMIN_SETTINGS = {
         "gestion.ReservaClase": "fas fa-calendar-alt",
         "gestion.Software": "fas fa-compact-disc",
         "gestion.Visita": "fas fa-history",
+        "gestion.Mantenimiento": "fas fa-tools",
     },
 
     # Opciones de la UI

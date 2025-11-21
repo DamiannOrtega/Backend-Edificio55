@@ -1,12 +1,14 @@
 from django.contrib import admin
-from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from .forms import RecurrenciaForm
+from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana, Mantenimiento
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect, JsonResponse, FileResponse
+from .forms import RecurrenciaForm, MantenimientoForm
 from datetime import timedelta, datetime
 from django.urls import path
 from django.utils.html import format_html
 from django.urls import reverse
+from django.contrib import messages
+from django.utils.safestring import mark_safe
 
 # --- Clases de Administración existentes ---
 
@@ -38,6 +40,12 @@ class SoftwareAdmin(admin.ModelAdmin):
 class PCInline(admin.TabularInline):
     model = PC
     extra = 1
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Ordenar laboratorios alfabéticamente"""
+        if db_field.name == "laboratorio":
+            kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 class PCAdmin(admin.ModelAdmin):
     # Columnas a mostrar en la lista
@@ -55,6 +63,12 @@ class PCAdmin(admin.ModelAdmin):
     # Acciones personalizadas
     actions = ['actualizar_estados_segun_reservas']
     
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Ordenar laboratorios alfabéticamente"""
+        if db_field.name == "laboratorio":
+            kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
     def get_disponibilidad(self, obj):
         """Muestra si la PC está disponible para uso individual"""
         if obj.esta_disponible_para_uso():
@@ -69,6 +83,36 @@ class PCAdmin(admin.ModelAdmin):
         call_command('actualizar_estados_pcs')
         self.message_user(request, "✅ Estados de PCs actualizados según reservas activas")
     actualizar_estados_segun_reservas.short_description = "Actualizar estados según reservas activas"
+    
+    def save_model(self, request, obj, form, change):
+        """Sobrescribe el método save para crear mantenimiento automáticamente"""
+        from django.utils import timezone
+        
+        # Si es una edición (change=True), verificar si el estado cambió a Mantenimiento
+        if change:
+            # Obtener el objeto original de la base de datos
+            original_obj = PC.objects.get(pk=obj.pk)
+            estado_anterior = original_obj.estado
+            estado_nuevo = obj.estado
+            
+            # Si el estado cambió a Mantenimiento, crear un registro de mantenimiento
+            if estado_anterior != 'Mantenimiento' and estado_nuevo == 'Mantenimiento':
+                # Verificar si ya existe un mantenimiento activo para esta PC
+                mantenimiento_activo = Mantenimiento.objects.filter(
+                    pc=obj,
+                    fecha_fin__isnull=True
+                ).exists()
+                
+                if not mantenimiento_activo:
+                    Mantenimiento.objects.create(
+                        pc=obj,
+                        descripcion='',  # Vacío porque se cambió desde PC
+                        fecha_inicio=timezone.now()
+                    )
+                    self.message_user(request, f"✅ Se creó automáticamente un registro de mantenimiento para {obj}", messages.SUCCESS)
+        
+        # Guardar el objeto
+        super().save_model(request, obj, form, change)
 
 class LaboratorioAdmin(admin.ModelAdmin):
     # 1. Añade el inline para PCs
@@ -109,6 +153,137 @@ class VisitaAdmin(admin.ModelAdmin):
         return "En curso"
     get_duracion.short_description = 'Duración'
 
+class MantenimientoAdmin(admin.ModelAdmin):
+    """Administración de mantenimientos de PCs"""
+    form = MantenimientoForm
+    list_display = ('pc', 'get_laboratorio', 'descripcion', 'fecha_inicio', 'fecha_fin', 'get_estado', 'get_duracion', 'acciones')
+    list_filter = ('fecha_inicio', 'pc__laboratorio', 'fecha_fin')
+    search_fields = ('pc__laboratorio__nombre', 'pc__numero_pc', 'descripcion')
+    date_hierarchy = 'fecha_inicio'
+    ordering = ('-fecha_inicio',)
+    
+    fieldsets = (
+        ('Información del Mantenimiento', {
+            'fields': ('laboratorio', 'pc', 'descripcion', 'fecha_inicio', 'fecha_fin'),
+            'description': 'Seleccione primero el laboratorio para filtrar las PCs disponibles'
+        }),
+    )
+    
+    readonly_fields = ()
+    
+    class Media:
+        js = ('js/mantenimiento_form.js',)
+    
+    def get_laboratorio(self, obj):
+        """Retorna el laboratorio al que pertenece la PC"""
+        return obj.pc.laboratorio.nombre
+    get_laboratorio.short_description = 'Laboratorio'
+    
+    def get_estado(self, obj):
+        """Retorna el estado del mantenimiento con formato visual"""
+        if obj.fecha_fin:
+            return format_html('<span style="color: green; font-weight: bold;">✓ Terminado</span>')
+        return format_html('<span style="color: orange; font-weight: bold;">● Activo</span>')
+    get_estado.short_description = 'Estado'
+    
+    def get_duracion(self, obj):
+        """Retorna la duración del mantenimiento"""
+        return obj.get_duracion()
+    get_duracion.short_description = 'Duración'
+    
+    def acciones(self, obj):
+        """Botones de acción para cada mantenimiento"""
+        if not obj.fecha_fin:
+            finalizar_url = reverse('admin:finalizar_mantenimiento', args=[obj.pk])
+            return format_html(
+                '<a class="button" href="{}" style="background-color: #28a745; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Finalizar Mantenimiento</a>',
+                finalizar_url
+            )
+        return format_html('<span style="color: #6c757d;">Finalizado</span>')
+    acciones.short_description = 'Acciones'
+    
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('finalizar-mantenimiento/<int:mantenimiento_id>/', self.admin_site.admin_view(self.finalizar_mantenimiento_view), name='finalizar_mantenimiento'),
+            path('get-pcs/', self.admin_site.admin_view(self.get_pcs_view), name='get_pcs'),
+        ]
+        return custom_urls + urls
+    
+    def get_pcs_view(self, request):
+        """Vista AJAX para obtener las PCs de un laboratorio"""
+        from django.http import JsonResponse
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        laboratorio_id = request.GET.get('laboratorio_id')
+        
+        logger.info(f'get_pcs_view llamado con laboratorio_id: {laboratorio_id}')
+        
+        if laboratorio_id:
+            try:
+                pcs = PC.objects.filter(laboratorio_id=laboratorio_id).order_by('numero_pc')
+                pcs_data = [{'id': pc.id, 'nombre': str(pc)} for pc in pcs]
+                logger.info(f'PCs encontradas: {len(pcs_data)}')
+                response = JsonResponse({'pcs': pcs_data})
+                return response
+            except Exception as e:
+                logger.error(f'Error en get_pcs_view: {str(e)}')
+                return JsonResponse({'error': str(e), 'pcs': []}, status=400)
+        return JsonResponse({'pcs': []})
+    
+    def finalizar_mantenimiento_view(self, request, mantenimiento_id):
+        """Vista para finalizar un mantenimiento"""
+        from django.utils import timezone
+        
+        try:
+            mantenimiento = Mantenimiento.objects.get(id=mantenimiento_id)
+            
+            if mantenimiento.fecha_fin:
+                messages.warning(request, 'Este mantenimiento ya está finalizado')
+            else:
+                mantenimiento.fecha_fin = timezone.now()
+                mantenimiento.save()
+                
+                # Cambiar el estado de la PC a Disponible si estaba en Mantenimiento
+                if mantenimiento.pc.estado == 'Mantenimiento':
+                    mantenimiento.pc.estado = 'Disponible'
+                    mantenimiento.pc.save()
+                
+                messages.success(request, f'✅ Mantenimiento de {mantenimiento.pc} finalizado correctamente')
+            
+            return redirect('admin:gestion_mantenimiento_changelist')
+        except Mantenimiento.DoesNotExist:
+            messages.error(request, 'Mantenimiento no encontrado')
+            return redirect('admin:gestion_mantenimiento_changelist')
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Personaliza el queryset para el campo PC basado en el laboratorio"""
+        if db_field.name == "pc":
+            # Si hay un laboratorio seleccionado en el GET o POST, filtrar PCs
+            laboratorio_id = request.GET.get('laboratorio') or request.POST.get('laboratorio')
+            if laboratorio_id:
+                kwargs["queryset"] = PC.objects.filter(laboratorio_id=laboratorio_id).order_by('numero_pc')
+            else:
+                # Si no hay laboratorio seleccionado, no mostrar PCs
+                kwargs["queryset"] = PC.objects.none()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def save_model(self, request, obj, form, change):
+        """Sobrescribe el método save para manejar el campo laboratorio"""
+        # El campo laboratorio es solo para filtrado, no se guarda
+        # La PC ya tiene el laboratorio asociado
+        # Establecer fecha_inicio por defecto si no está establecida
+        if not obj.fecha_inicio:
+            from django.utils import timezone
+            obj.fecha_inicio = timezone.now()
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        """Optimizar consultas para evitar N+1 queries"""
+        qs = super().get_queryset(request)
+        return qs.select_related('pc', 'pc__laboratorio')
+
 class ReservaClaseAdmin(admin.ModelAdmin):
     list_display = ('laboratorio', 'profesor', 'materia', 'fecha_hora_inicio', 'fecha_hora_fin', 'serie')
     list_filter = (
@@ -126,6 +301,12 @@ class ReservaClaseAdmin(admin.ModelAdmin):
         """Optimizar consultas para evitar N+1 queries"""
         qs = super().get_queryset(request)
         return qs.select_related('laboratorio', 'serie')
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Ordenar laboratorios alfabéticamente"""
+        if db_field.name == "laboratorio":
+            kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 class ReservaClaseInline(admin.TabularInline):
     model = ReservaClase
@@ -162,6 +343,29 @@ class SerieReservaAdmin(admin.ModelAdmin):
         }),
     )
     
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Ordenar laboratorios alfabéticamente"""
+        if db_field.name == "laboratorio":
+            kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        """Personaliza el queryset para ordenar los días de la semana correctamente"""
+        if db_field.name == 'dias_semana':
+            # Mapeo de orden: Domingo=0, Lunes=1, Martes=2, Miércoles=3, Jueves=4, Viernes=5, Sábado=6
+            from .models import DiaSemana
+            from django.db.models import Case, When, IntegerField
+            
+            orden_dias = {'D': 0, 'L': 1, 'M': 2, 'X': 3, 'J': 4, 'V': 5, 'S': 6}
+            
+            # Crear un queryset ordenado usando Case/When
+            when_conditions = [When(codigo=codigo, then=orden) for codigo, orden in orden_dias.items()]
+            kwargs['queryset'] = DiaSemana.objects.annotate(
+                orden_dia=Case(*when_conditions, default=99, output_field=IntegerField())
+            ).order_by('orden_dia')
+        
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+    
     def get_dias_display(self, obj):
         return obj.get_dias_display()
     get_dias_display.short_description = 'Días'
@@ -181,7 +385,7 @@ class SerieReservaAdmin(admin.ModelAdmin):
             if serie.activa and serie.dias_semana.exists():
                 self.crear_reservas_recurrentes(serie)
                 total_reservas_creadas += serie.ocurrencias.count()
-            else:
+        else:
                 self.message_user(request, f"⚠️ La serie '{serie.nombre}' está inactiva o no tiene días seleccionados.", level='WARNING')
         
         self.message_user(request, f"✅ Se regeneraron las reservas para {queryset.count()} serie(s). Total de reservas: {total_reservas_creadas}")
@@ -277,7 +481,15 @@ class SerieReservaAdmin(admin.ModelAdmin):
 
 class DiaSemanaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'codigo')
-    ordering = ('codigo',)
+    
+    def get_queryset(self, request):
+        """Ordena los días de la semana: Domingo, Lunes, Martes, etc."""
+        from django.db.models import Case, When, IntegerField
+        orden_dias = {'D': 0, 'L': 1, 'M': 2, 'X': 3, 'J': 4, 'V': 5, 'S': 6}
+        when_conditions = [When(codigo=codigo, then=orden) for codigo, orden in orden_dias.items()]
+        return super().get_queryset(request).annotate(
+            orden_dia=Case(*when_conditions, default=99, output_field=IntegerField())
+        ).order_by('orden_dia')
 
 # --- Registramos todos los modelos con sus clases personalizadas ---
 admin.site.register(Laboratorio, LaboratorioAdmin)
@@ -288,3 +500,4 @@ admin.site.register(ReservaClase, ReservaClaseAdmin)
 admin.site.register(Visita, VisitaAdmin)
 admin.site.register(SerieReserva, SerieReservaAdmin)
 admin.site.register(DiaSemana, DiaSemanaAdmin)
+admin.site.register(Mantenimiento, MantenimientoAdmin)
