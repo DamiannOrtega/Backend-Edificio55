@@ -153,6 +153,94 @@ class VisitaAdmin(admin.ModelAdmin):
         return "En curso"
     get_duracion.short_description = 'Duración'
 
+class EstudianteAdmin(admin.ModelAdmin):
+    """Administración mejorada para Visitantes (Estudiantes)"""
+    list_display = (
+        'id', 
+        'nombre_completo', 
+        'correo', 
+        'get_fecha_primer_registro',
+        'get_total_visitas',
+        'get_software_mas_usado',
+        'get_ultima_visita'
+    )
+    
+    list_filter = ('visita__fecha_hora_inicio',)
+    search_fields = ('id', 'nombre_completo', 'correo')
+    ordering = ('nombre_completo',)
+    
+    def get_queryset(self, request):
+        """Optimizar consultas para evitar N+1 queries"""
+        qs = super().get_queryset(request)
+        return qs.prefetch_related('visita_set', 'visita_set__software_utilizado')
+    
+    def get_fecha_primer_registro(self, obj):
+        """Retorna la fecha de la primera visita del estudiante"""
+        primera_visita = obj.visita_set.order_by('fecha_hora_inicio').first()
+        if primera_visita:
+            return primera_visita.fecha_hora_inicio.strftime('%d/%m/%Y %H:%M')
+        return "Sin visitas"
+    get_fecha_primer_registro.short_description = 'Primer Registro'
+    get_fecha_primer_registro.admin_order_field = 'visita__fecha_hora_inicio'
+    
+    def get_total_visitas(self, obj):
+        """Retorna el total de visitas del estudiante"""
+        total = obj.visita_set.count()
+        if total > 0:
+            return format_html('<span style="font-weight: bold; color: #0066cc;">{}</span>', total)
+        return 0
+    get_total_visitas.short_description = 'Total Visitas'
+    
+    def get_software_mas_usado(self, obj):
+        """Retorna el software más utilizado por el estudiante"""
+        from django.db.models import Count
+        
+        software_stats = obj.visita_set.values('software_utilizado__nombre').annotate(
+            count=Count('software_utilizado')
+        ).order_by('-count').first()
+        
+        if software_stats and software_stats['software_utilizado__nombre']:
+            nombre = software_stats['software_utilizado__nombre']
+            count = software_stats['count']
+            return format_html(
+                '<span style="color: #28a745;">{}</span> <span style="color: #6c757d; font-size: 0.9em;">({}x)</span>',
+                nombre, count
+            )
+        return format_html('<span style="color: #999;">N/A</span>')
+    get_software_mas_usado.short_description = 'Software Más Usado'
+    
+    def get_ultima_visita(self, obj):
+        """Retorna la fecha de la última visita del estudiante"""
+        ultima_visita = obj.visita_set.order_by('-fecha_hora_inicio').first()
+        if ultima_visita:
+            fecha = ultima_visita.fecha_hora_inicio
+            # Calcular hace cuánto tiempo
+            from django.utils import timezone
+            ahora = timezone.now()
+            diferencia = ahora - fecha
+            
+            if diferencia.days == 0:
+                tiempo_texto = "Hoy"
+            elif diferencia.days == 1:
+                tiempo_texto = "Ayer"
+            elif diferencia.days < 7:
+                tiempo_texto = f"Hace {diferencia.days} días"
+            elif diferencia.days < 30:
+                semanas = diferencia.days // 7
+                tiempo_texto = f"Hace {semanas} semana{'s' if semanas > 1 else ''}"
+            else:
+                meses = diferencia.days // 30
+                tiempo_texto = f"Hace {meses} mes{'es' if meses > 1 else ''}"
+            
+            return format_html(
+                '<span style="color: #495057;">{}</span><br><span style="color: #6c757d; font-size: 0.85em;">{}</span>',
+                fecha.strftime('%d/%m/%Y %H:%M'),
+                tiempo_texto
+            )
+        return format_html('<span style="color: #999;">Sin visitas</span>')
+    get_ultima_visita.short_description = 'Última Visita'
+    get_ultima_visita.admin_order_field = '-visita__fecha_hora_inicio'
+
 class MantenimientoAdmin(admin.ModelAdmin):
     """Administración de mantenimientos de PCs"""
     form = MantenimientoForm
@@ -522,7 +610,7 @@ class DiaSemanaAdmin(admin.ModelAdmin):
 admin.site.register(Laboratorio, LaboratorioAdmin)
 admin.site.register(Software, SoftwareAdmin)
 admin.site.register(PC, PCAdmin)
-admin.site.register(Estudiante)
+admin.site.register(Estudiante, EstudianteAdmin)
 admin.site.register(ReservaClase, ReservaClaseAdmin)
 admin.site.register(Visita, VisitaAdmin)
 admin.site.register(SerieReserva, SerieReservaAdmin)

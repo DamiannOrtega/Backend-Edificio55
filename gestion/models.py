@@ -79,6 +79,10 @@ class Estudiante(models.Model):
 
     def __str__(self):
         return self.nombre_completo
+    
+    class Meta:
+        verbose_name = "Visitante"
+        verbose_name_plural = "Visitantes"
 
 class DiaSemana(models.Model):
     """Modelo para representar los días de la semana"""
