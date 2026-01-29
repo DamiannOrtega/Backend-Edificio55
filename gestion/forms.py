@@ -44,28 +44,53 @@ class RecurrenciaForm(forms.Form):
 
 class MantenimientoForm(forms.ModelForm):
     """Formulario personalizado para Mantenimiento con selector de laboratorio"""
+
+    # Campo auxiliar para elegir laboratorio (no pertenece al modelo)
     laboratorio = forms.ModelChoiceField(
         queryset=Laboratorio.objects.all().order_by('nombre'),
         label="Laboratorio",
         required=True,
         empty_label="Seleccione un laboratorio",
-        help_text="Seleccione primero el laboratorio para ver las PCs disponibles"
+        help_text="Seleccione primero el laboratorio para ver las PCs disponibles",
     )
-    
+
+    # Definir explícitamente los campos de fecha/hora para que NO usen SplitDateTime
+    fecha_inicio = forms.DateTimeField(
+        label="Fecha y Hora de Inicio",
+        widget=forms.DateTimeInput(
+            attrs={
+                "type": "datetime-local",
+                "required": True,
+            }
+        ),
+        required=True,
+    )
+
+    fecha_fin = forms.DateTimeField(
+        label="Fecha y Hora de Fin (opcional)",
+        widget=forms.DateTimeInput(
+            attrs={
+                "type": "datetime-local",
+            }
+        ),
+        required=False,
+    )
+
     class Meta:
         model = Mantenimiento
-        fields = ['pc', 'descripcion', 'fecha_inicio', 'fecha_fin']
+        fields = ["pc", "descripcion", "fecha_inicio", "fecha_fin"]
         widgets = {
-            'pc': forms.Select(attrs={'id': 'id_pc'}),
-            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Ingrese los detalles del mantenimiento...'}),
-            'fecha_inicio': forms.DateTimeInput(attrs={'type': 'datetime-local', 'required': True}),
-            'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            "pc": forms.Select(attrs={"id": "id_pc"}),
+            "descripcion": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "placeholder": "Ingrese los detalles del mantenimiento...",
+                }
+            ),
         }
         labels = {
-            'pc': 'PC',
-            'descripcion': 'Descripción',
-            'fecha_inicio': 'Fecha y Hora de Inicio',
-            'fecha_fin': 'Fecha y Hora de Fin (opcional)',
+            "pc": "PC",
+            "descripcion": "Descripción",
         }
     
     def __init__(self, *args, **kwargs):
@@ -74,13 +99,21 @@ class MantenimientoForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             self.fields['laboratorio'].initial = self.instance.pc.laboratorio
             self.fields['pc'].queryset = PC.objects.filter(laboratorio=self.instance.pc.laboratorio).order_by('numero_pc')
+            
+            # Convertir fechas existentes a zona horaria local para el widget datetime-local
+            if self.instance.fecha_inicio:
+                fecha_inicio_local = timezone.localtime(self.instance.fecha_inicio)
+                self.initial['fecha_inicio'] = fecha_inicio_local.strftime('%Y-%m-%dT%H:%M')
+            if self.instance.fecha_fin:
+                fecha_fin_local = timezone.localtime(self.instance.fecha_fin)
+                self.initial['fecha_fin'] = fecha_fin_local.strftime('%Y-%m-%dT%H:%M')
         else:
             # Si es nuevo, no mostrar PCs hasta que se seleccione un laboratorio
             self.fields['pc'].queryset = PC.objects.none()
             # Establecer fecha_inicio por defecto si no está establecida
             if not self.initial.get('fecha_inicio'):
-                from django.utils import timezone
-                now = timezone.now()
+                # Convertir a la zona horaria local antes de formatear
+                now = timezone.localtime(timezone.now())
                 # Formatear para datetime-local (YYYY-MM-DDTHH:MM)
                 fecha_str = now.strftime('%Y-%m-%dT%H:%M')
                 self.initial['fecha_inicio'] = fecha_str
@@ -98,6 +131,30 @@ class MantenimientoForm(forms.ModelForm):
                     self.fields['pc'].queryset = PC.objects.filter(laboratorio_id=laboratorio_id).order_by('numero_pc')
                 except (ValueError, TypeError):
                     pass
+    
+    def clean_fecha_inicio(self):
+        """Asegurar que la fecha_inicio se interprete como hora local"""
+        fecha_inicio = self.cleaned_data.get('fecha_inicio')
+        if fecha_inicio:
+            # Si el datetime es naive (sin zona horaria), asumir que es hora local
+            # Esto es lo que envía el widget datetime-local
+            if timezone.is_naive(fecha_inicio):
+                # Convertir a zona horaria local (datetime-local siempre envía hora local)
+                fecha_inicio = timezone.make_aware(fecha_inicio, timezone.get_current_timezone())
+            # Si ya es aware, mantenerlo así (ya está en la zona horaria correcta)
+        return fecha_inicio
+    
+    def clean_fecha_fin(self):
+        """Asegurar que la fecha_fin se interprete como hora local"""
+        fecha_fin = self.cleaned_data.get('fecha_fin')
+        if fecha_fin:
+            # Si el datetime es naive (sin zona horaria), asumir que es hora local
+            # Esto es lo que envía el widget datetime-local
+            if timezone.is_naive(fecha_fin):
+                # Convertir a zona horaria local (datetime-local siempre envía hora local)
+                fecha_fin = timezone.make_aware(fecha_fin, timezone.get_current_timezone())
+            # Si ya es aware, mantenerlo así (ya está en la zona horaria correcta)
+        return fecha_fin
     
     def clean(self):
         """Validación personalizada"""

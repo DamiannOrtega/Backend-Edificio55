@@ -1,0 +1,3271 @@
+[
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$600000$ftwF51rLz8ipNwsVJrlZlh$0IwiT26Vm26litlZA42lKBM/pk4wZjj2QkNOteGHTh8=",
+    "last_login": "2025-11-21T16:15:31.098Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "UAAEdificio55@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2025-09-25T18:29:29.014Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "gestion.laboratorio",
+  "pk": 1,
+  "fields": {
+    "nombre": "Laboratorio A",
+    "descripcion": ""
+  }
+},
+{
+  "model": "gestion.laboratorio",
+  "pk": 2,
+  "fields": {
+    "nombre": "Laboratorio B",
+    "descripcion": ""
+  }
+},
+{
+  "model": "gestion.laboratorio",
+  "pk": 3,
+  "fields": {
+    "nombre": "Laboratorio C",
+    "descripcion": ""
+  }
+},
+{
+  "model": "gestion.laboratorio",
+  "pk": 4,
+  "fields": {
+    "nombre": "Laboratorio D",
+    "descripcion": ""
+  }
+},
+{
+  "model": "gestion.laboratorio",
+  "pk": 5,
+  "fields": {
+    "nombre": "Laboratorio E",
+    "descripcion": ""
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 1,
+  "fields": {
+    "nombre": "Office",
+    "version": null,
+    "laboratorios": [
+      1,
+      2,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 2,
+  "fields": {
+    "nombre": "NetBeans",
+    "version": null,
+    "laboratorios": [
+      1,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 3,
+  "fields": {
+    "nombre": "Visual Studio 2022",
+    "version": null,
+    "laboratorios": [
+      2,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 4,
+  "fields": {
+    "nombre": "DevC++",
+    "version": null,
+    "laboratorios": [
+      1,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 5,
+  "fields": {
+    "nombre": "Java",
+    "version": null,
+    "laboratorios": [
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 6,
+  "fields": {
+    "nombre": "Java Development Kit",
+    "version": null,
+    "laboratorios": [
+      3
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 7,
+  "fields": {
+    "nombre": "Power BI",
+    "version": null,
+    "laboratorios": [
+      1,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 8,
+  "fields": {
+    "nombre": "SQL Server 2022",
+    "version": null,
+    "laboratorios": [
+      2,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 9,
+  "fields": {
+    "nombre": "MySQL",
+    "version": null,
+    "laboratorios": [
+      1,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 10,
+  "fields": {
+    "nombre": "PSeInt",
+    "version": null,
+    "laboratorios": [
+      1,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 11,
+  "fields": {
+    "nombre": "R",
+    "version": null,
+    "laboratorios": [
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 12,
+  "fields": {
+    "nombre": "Star UML",
+    "version": null,
+    "laboratorios": [
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 13,
+  "fields": {
+    "nombre": "Visual Paradigm",
+    "version": null,
+    "laboratorios": [
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 14,
+  "fields": {
+    "nombre": "Safe Exam Browser",
+    "version": null,
+    "laboratorios": [
+      1,
+      2,
+      3,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 15,
+  "fields": {
+    "nombre": "AutoCAD",
+    "version": null,
+    "laboratorios": [
+      2
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 16,
+  "fields": {
+    "nombre": "Android Studio",
+    "version": null,
+    "laboratorios": [
+      1,
+      2
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 17,
+  "fields": {
+    "nombre": "Unity Hub",
+    "version": null,
+    "laboratorios": [
+      2
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 18,
+  "fields": {
+    "nombre": "XAMPP",
+    "version": null,
+    "laboratorios": [
+      2
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 19,
+  "fields": {
+    "nombre": "Adobe Acrobat",
+    "version": null,
+    "laboratorios": [
+      1,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 20,
+  "fields": {
+    "nombre": "Adobe Animate",
+    "version": null,
+    "laboratorios": [
+      1
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 21,
+  "fields": {
+    "nombre": "QGIS",
+    "version": "3.34.10",
+    "laboratorios": [
+      1
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 22,
+  "fields": {
+    "nombre": "Scribus",
+    "version": "1.6.1",
+    "laboratorios": [
+      1
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 23,
+  "fields": {
+    "nombre": "Visual Studio Code",
+    "version": null,
+    "laboratorios": [
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 24,
+  "fields": {
+    "nombre": "Postman",
+    "version": null,
+    "laboratorios": [
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 26,
+  "fields": {
+    "nombre": "Internet",
+    "version": null,
+    "laboratorios": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.software",
+  "pk": 27,
+  "fields": {
+    "nombre": "Unity",
+    "version": "1.8",
+    "laboratorios": [
+      1,
+      3,
+      4
+    ]
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 1,
+  "fields": {
+    "numero_pc": 1,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 2,
+  "fields": {
+    "numero_pc": 2,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 3,
+  "fields": {
+    "numero_pc": 3,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 4,
+  "fields": {
+    "numero_pc": 4,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 5,
+  "fields": {
+    "numero_pc": 5,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 6,
+  "fields": {
+    "numero_pc": 6,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 7,
+  "fields": {
+    "numero_pc": 7,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 8,
+  "fields": {
+    "numero_pc": 8,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 9,
+  "fields": {
+    "numero_pc": 9,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 10,
+  "fields": {
+    "numero_pc": 10,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 11,
+  "fields": {
+    "numero_pc": 11,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 12,
+  "fields": {
+    "numero_pc": 12,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 13,
+  "fields": {
+    "numero_pc": 13,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 14,
+  "fields": {
+    "numero_pc": 14,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 15,
+  "fields": {
+    "numero_pc": 15,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 16,
+  "fields": {
+    "numero_pc": 16,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 17,
+  "fields": {
+    "numero_pc": 17,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 18,
+  "fields": {
+    "numero_pc": 18,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 19,
+  "fields": {
+    "numero_pc": 19,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 20,
+  "fields": {
+    "numero_pc": 20,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 21,
+  "fields": {
+    "numero_pc": 21,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 22,
+  "fields": {
+    "numero_pc": 22,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 23,
+  "fields": {
+    "numero_pc": 23,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 24,
+  "fields": {
+    "numero_pc": 24,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 25,
+  "fields": {
+    "numero_pc": 25,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 26,
+  "fields": {
+    "numero_pc": 26,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 27,
+  "fields": {
+    "numero_pc": 27,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 28,
+  "fields": {
+    "numero_pc": 28,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 29,
+  "fields": {
+    "numero_pc": 29,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 30,
+  "fields": {
+    "numero_pc": 30,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 31,
+  "fields": {
+    "numero_pc": 31,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 32,
+  "fields": {
+    "numero_pc": 32,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 33,
+  "fields": {
+    "numero_pc": 33,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 34,
+  "fields": {
+    "numero_pc": 34,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 35,
+  "fields": {
+    "numero_pc": 35,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 36,
+  "fields": {
+    "numero_pc": 36,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 37,
+  "fields": {
+    "numero_pc": 37,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 38,
+  "fields": {
+    "numero_pc": 38,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 39,
+  "fields": {
+    "numero_pc": 39,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 40,
+  "fields": {
+    "numero_pc": 40,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 41,
+  "fields": {
+    "numero_pc": 41,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 42,
+  "fields": {
+    "numero_pc": 42,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 43,
+  "fields": {
+    "numero_pc": 43,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 44,
+  "fields": {
+    "numero_pc": 44,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 45,
+  "fields": {
+    "numero_pc": 45,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 46,
+  "fields": {
+    "numero_pc": 46,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 47,
+  "fields": {
+    "numero_pc": 47,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 48,
+  "fields": {
+    "numero_pc": 48,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 49,
+  "fields": {
+    "numero_pc": 49,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 50,
+  "fields": {
+    "numero_pc": 50,
+    "laboratorio": 1,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 51,
+  "fields": {
+    "numero_pc": 1,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 52,
+  "fields": {
+    "numero_pc": 2,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 53,
+  "fields": {
+    "numero_pc": 3,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 54,
+  "fields": {
+    "numero_pc": 4,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 55,
+  "fields": {
+    "numero_pc": 5,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 56,
+  "fields": {
+    "numero_pc": 6,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 57,
+  "fields": {
+    "numero_pc": 7,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 58,
+  "fields": {
+    "numero_pc": 8,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 59,
+  "fields": {
+    "numero_pc": 9,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 60,
+  "fields": {
+    "numero_pc": 10,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 61,
+  "fields": {
+    "numero_pc": 11,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 62,
+  "fields": {
+    "numero_pc": 12,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 63,
+  "fields": {
+    "numero_pc": 13,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 64,
+  "fields": {
+    "numero_pc": 14,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 65,
+  "fields": {
+    "numero_pc": 15,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 66,
+  "fields": {
+    "numero_pc": 16,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 67,
+  "fields": {
+    "numero_pc": 17,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 68,
+  "fields": {
+    "numero_pc": 18,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 69,
+  "fields": {
+    "numero_pc": 19,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 70,
+  "fields": {
+    "numero_pc": 20,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 71,
+  "fields": {
+    "numero_pc": 21,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 72,
+  "fields": {
+    "numero_pc": 22,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 73,
+  "fields": {
+    "numero_pc": 23,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 74,
+  "fields": {
+    "numero_pc": 24,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 75,
+  "fields": {
+    "numero_pc": 25,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 76,
+  "fields": {
+    "numero_pc": 26,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 77,
+  "fields": {
+    "numero_pc": 27,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 78,
+  "fields": {
+    "numero_pc": 28,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 79,
+  "fields": {
+    "numero_pc": 29,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 80,
+  "fields": {
+    "numero_pc": 30,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 81,
+  "fields": {
+    "numero_pc": 31,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 82,
+  "fields": {
+    "numero_pc": 32,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 83,
+  "fields": {
+    "numero_pc": 33,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 84,
+  "fields": {
+    "numero_pc": 34,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 85,
+  "fields": {
+    "numero_pc": 35,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 86,
+  "fields": {
+    "numero_pc": 36,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 87,
+  "fields": {
+    "numero_pc": 37,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 88,
+  "fields": {
+    "numero_pc": 38,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 89,
+  "fields": {
+    "numero_pc": 39,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 90,
+  "fields": {
+    "numero_pc": 40,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 91,
+  "fields": {
+    "numero_pc": 41,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 92,
+  "fields": {
+    "numero_pc": 42,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 93,
+  "fields": {
+    "numero_pc": 43,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 94,
+  "fields": {
+    "numero_pc": 44,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 95,
+  "fields": {
+    "numero_pc": 45,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 96,
+  "fields": {
+    "numero_pc": 46,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 97,
+  "fields": {
+    "numero_pc": 47,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 98,
+  "fields": {
+    "numero_pc": 48,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 99,
+  "fields": {
+    "numero_pc": 49,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 100,
+  "fields": {
+    "numero_pc": 50,
+    "laboratorio": 3,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 101,
+  "fields": {
+    "numero_pc": 1,
+    "laboratorio": 4,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 102,
+  "fields": {
+    "numero_pc": 2,
+    "laboratorio": 4,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 151,
+  "fields": {
+    "numero_pc": 1,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 152,
+  "fields": {
+    "numero_pc": 2,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 153,
+  "fields": {
+    "numero_pc": 3,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 154,
+  "fields": {
+    "numero_pc": 4,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 155,
+  "fields": {
+    "numero_pc": 5,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 156,
+  "fields": {
+    "numero_pc": 6,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 157,
+  "fields": {
+    "numero_pc": 7,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 158,
+  "fields": {
+    "numero_pc": 8,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 159,
+  "fields": {
+    "numero_pc": 9,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 160,
+  "fields": {
+    "numero_pc": 10,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 161,
+  "fields": {
+    "numero_pc": 11,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 162,
+  "fields": {
+    "numero_pc": 12,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 163,
+  "fields": {
+    "numero_pc": 13,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 164,
+  "fields": {
+    "numero_pc": 14,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 165,
+  "fields": {
+    "numero_pc": 15,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 166,
+  "fields": {
+    "numero_pc": 16,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 167,
+  "fields": {
+    "numero_pc": 17,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 168,
+  "fields": {
+    "numero_pc": 18,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 169,
+  "fields": {
+    "numero_pc": 19,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 170,
+  "fields": {
+    "numero_pc": 20,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 171,
+  "fields": {
+    "numero_pc": 21,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 172,
+  "fields": {
+    "numero_pc": 22,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 173,
+  "fields": {
+    "numero_pc": 23,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 174,
+  "fields": {
+    "numero_pc": 24,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 175,
+  "fields": {
+    "numero_pc": 25,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 176,
+  "fields": {
+    "numero_pc": 26,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 177,
+  "fields": {
+    "numero_pc": 27,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 178,
+  "fields": {
+    "numero_pc": 28,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 179,
+  "fields": {
+    "numero_pc": 29,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 180,
+  "fields": {
+    "numero_pc": 30,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 181,
+  "fields": {
+    "numero_pc": 31,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 182,
+  "fields": {
+    "numero_pc": 32,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 183,
+  "fields": {
+    "numero_pc": 33,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 184,
+  "fields": {
+    "numero_pc": 34,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 185,
+  "fields": {
+    "numero_pc": 35,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 186,
+  "fields": {
+    "numero_pc": 36,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 187,
+  "fields": {
+    "numero_pc": 37,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 188,
+  "fields": {
+    "numero_pc": 38,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 189,
+  "fields": {
+    "numero_pc": 39,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 190,
+  "fields": {
+    "numero_pc": 40,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 191,
+  "fields": {
+    "numero_pc": 41,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 192,
+  "fields": {
+    "numero_pc": 42,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 193,
+  "fields": {
+    "numero_pc": 43,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 194,
+  "fields": {
+    "numero_pc": 44,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 195,
+  "fields": {
+    "numero_pc": 45,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 196,
+  "fields": {
+    "numero_pc": 46,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 197,
+  "fields": {
+    "numero_pc": 47,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 199,
+  "fields": {
+    "numero_pc": 49,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 201,
+  "fields": {
+    "numero_pc": 1,
+    "laboratorio": 2,
+    "estado": "Mantenimiento"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 202,
+  "fields": {
+    "numero_pc": 2,
+    "laboratorio": 2,
+    "estado": "En Uso"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 203,
+  "fields": {
+    "numero_pc": 3,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 254,
+  "fields": {
+    "numero_pc": 4,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 255,
+  "fields": {
+    "numero_pc": 5,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 256,
+  "fields": {
+    "numero_pc": 6,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 257,
+  "fields": {
+    "numero_pc": 7,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 258,
+  "fields": {
+    "numero_pc": 8,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 259,
+  "fields": {
+    "numero_pc": 9,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 260,
+  "fields": {
+    "numero_pc": 10,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 261,
+  "fields": {
+    "numero_pc": 11,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 262,
+  "fields": {
+    "numero_pc": 12,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 263,
+  "fields": {
+    "numero_pc": 13,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 264,
+  "fields": {
+    "numero_pc": 14,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 265,
+  "fields": {
+    "numero_pc": 15,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 266,
+  "fields": {
+    "numero_pc": 16,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 267,
+  "fields": {
+    "numero_pc": 17,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 268,
+  "fields": {
+    "numero_pc": 18,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 269,
+  "fields": {
+    "numero_pc": 19,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 270,
+  "fields": {
+    "numero_pc": 20,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 271,
+  "fields": {
+    "numero_pc": 21,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 272,
+  "fields": {
+    "numero_pc": 22,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 273,
+  "fields": {
+    "numero_pc": 23,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 274,
+  "fields": {
+    "numero_pc": 24,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 275,
+  "fields": {
+    "numero_pc": 25,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 276,
+  "fields": {
+    "numero_pc": 26,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 277,
+  "fields": {
+    "numero_pc": 27,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 278,
+  "fields": {
+    "numero_pc": 28,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 279,
+  "fields": {
+    "numero_pc": 29,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 280,
+  "fields": {
+    "numero_pc": 30,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 281,
+  "fields": {
+    "numero_pc": 31,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 282,
+  "fields": {
+    "numero_pc": 32,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 283,
+  "fields": {
+    "numero_pc": 33,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 284,
+  "fields": {
+    "numero_pc": 34,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 285,
+  "fields": {
+    "numero_pc": 35,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 286,
+  "fields": {
+    "numero_pc": 36,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 287,
+  "fields": {
+    "numero_pc": 37,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 288,
+  "fields": {
+    "numero_pc": 38,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 289,
+  "fields": {
+    "numero_pc": 39,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 290,
+  "fields": {
+    "numero_pc": 40,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 291,
+  "fields": {
+    "numero_pc": 41,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 292,
+  "fields": {
+    "numero_pc": 42,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 293,
+  "fields": {
+    "numero_pc": 43,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 294,
+  "fields": {
+    "numero_pc": 44,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 295,
+  "fields": {
+    "numero_pc": 45,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 296,
+  "fields": {
+    "numero_pc": 46,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 297,
+  "fields": {
+    "numero_pc": 47,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 298,
+  "fields": {
+    "numero_pc": 48,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 299,
+  "fields": {
+    "numero_pc": 49,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 300,
+  "fields": {
+    "numero_pc": 50,
+    "laboratorio": 2,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.pc",
+  "pk": 301,
+  "fields": {
+    "numero_pc": 48,
+    "laboratorio": 5,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "gestion.estudiante",
+  "pk": "228387",
+  "fields": {
+    "nombre_completo": "Juan Damian Ortega",
+    "correo": "al228387@edu.uaa.mx",
+    "celular": null
+  }
+},
+{
+  "model": "gestion.estudiante",
+  "pk": "234123",
+  "fields": {
+    "nombre_completo": "Luis García",
+    "correo": "al234123@edu.uaa.mx",
+    "celular": "4492145478"
+  }
+},
+{
+  "model": "gestion.estudiante",
+  "pk": "336685",
+  "fields": {
+    "nombre_completo": "Alejandra Lopez Serrano",
+    "correo": "al336685@edu.uaa.mx",
+    "celular": ""
+  }
+},
+{
+  "model": "gestion.estudiante",
+  "pk": "338227",
+  "fields": {
+    "nombre_completo": "Alicia Diaz",
+    "correo": "aliciadiaz@gmail.com",
+    "celular": null
+  }
+},
+{
+  "model": "gestion.estudiante",
+  "pk": "349388",
+  "fields": {
+    "nombre_completo": "Carlos Enrique Blanco Ortiz",
+    "correo": "al349388@edu.uaa.mx",
+    "celular": ""
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 1,
+  "fields": {
+    "codigo": "L",
+    "nombre": "Lunes"
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 2,
+  "fields": {
+    "codigo": "M",
+    "nombre": "Martes"
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 3,
+  "fields": {
+    "codigo": "X",
+    "nombre": "Miércoles"
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 4,
+  "fields": {
+    "codigo": "J",
+    "nombre": "Jueves"
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 5,
+  "fields": {
+    "codigo": "V",
+    "nombre": "Viernes"
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 6,
+  "fields": {
+    "codigo": "S",
+    "nombre": "Sábado"
+  }
+},
+{
+  "model": "gestion.diasemana",
+  "pk": 7,
+  "fields": {
+    "codigo": "D",
+    "nombre": "Domingo"
+  }
+},
+{
+  "model": "gestion.seriereserva",
+  "pk": 7,
+  "fields": {
+    "nombre": "Bases de Datos - Lunes a Viernes",
+    "laboratorio": 2,
+    "profesor": "Dra. López",
+    "materia": "Bases de Datos",
+    "fecha_inicio": "2025-10-20",
+    "fecha_fin": "2025-10-27",
+    "hora_inicio": "09:00:00",
+    "hora_fin": "10:00:00",
+    "activa": true,
+    "creada_el": "2025-10-20T19:34:12.977Z",
+    "dias_semana": [
+      4,
+      1,
+      2,
+      5,
+      3
+    ]
+  }
+},
+{
+  "model": "gestion.seriereserva",
+  "pk": 12,
+  "fields": {
+    "nombre": "Examen",
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_inicio": "2025-11-03",
+    "fecha_fin": "2026-01-05",
+    "hora_inicio": "08:00:00",
+    "hora_fin": "09:00:00",
+    "activa": true,
+    "creada_el": "2025-11-20T19:07:22.684Z",
+    "dias_semana": [
+      1,
+      2,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.seriereserva",
+  "pk": 13,
+  "fields": {
+    "nombre": "Clases",
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_inicio": "2026-01-26",
+    "fecha_fin": "2026-03-06",
+    "hora_inicio": "08:00:00",
+    "hora_fin": "09:00:00",
+    "activa": true,
+    "creada_el": "2025-11-20T19:44:09.295Z",
+    "dias_semana": [
+      4,
+      1,
+      2,
+      5,
+      3
+    ]
+  }
+},
+{
+  "model": "gestion.seriereserva",
+  "pk": 14,
+  "fields": {
+    "nombre": "Prueba",
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_inicio": "2025-11-03",
+    "fecha_fin": "2025-12-03",
+    "hora_inicio": "13:00:00",
+    "hora_fin": "14:00:00",
+    "activa": true,
+    "creada_el": "2025-11-20T19:46:41.165Z",
+    "dias_semana": [
+      4,
+      5
+    ]
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 118,
+  "fields": {
+    "serie": 7,
+    "laboratorio": 2,
+    "profesor": "Dra. López",
+    "materia": "Bases de Datos",
+    "fecha_hora_inicio": "2025-10-20T15:00:00Z",
+    "fecha_hora_fin": "2025-10-20T16:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 119,
+  "fields": {
+    "serie": 7,
+    "laboratorio": 2,
+    "profesor": "Dra. López",
+    "materia": "Bases de Datos",
+    "fecha_hora_inicio": "2025-10-21T15:00:00Z",
+    "fecha_hora_fin": "2025-10-21T16:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 120,
+  "fields": {
+    "serie": 7,
+    "laboratorio": 2,
+    "profesor": "Dra. López",
+    "materia": "Bases de Datos",
+    "fecha_hora_inicio": "2025-10-22T15:00:00Z",
+    "fecha_hora_fin": "2025-10-22T16:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 121,
+  "fields": {
+    "serie": 7,
+    "laboratorio": 2,
+    "profesor": "Dra. López",
+    "materia": "Bases de Datos",
+    "fecha_hora_inicio": "2025-10-23T15:00:00Z",
+    "fecha_hora_fin": "2025-10-23T16:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 123,
+  "fields": {
+    "serie": 7,
+    "laboratorio": 2,
+    "profesor": "Dra. López",
+    "materia": "Bases de Datos",
+    "fecha_hora_inicio": "2025-10-27T15:00:00Z",
+    "fecha_hora_fin": "2025-10-27T16:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 166,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-03T14:00:00Z",
+    "fecha_hora_fin": "2025-11-03T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 167,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-04T14:00:00Z",
+    "fecha_hora_fin": "2025-11-04T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 168,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-07T14:00:00Z",
+    "fecha_hora_fin": "2025-11-07T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 169,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-10T14:00:00Z",
+    "fecha_hora_fin": "2025-11-10T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 170,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-11T14:00:00Z",
+    "fecha_hora_fin": "2025-11-11T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 171,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-14T14:00:00Z",
+    "fecha_hora_fin": "2025-11-14T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 172,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-17T14:00:00Z",
+    "fecha_hora_fin": "2025-11-17T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 173,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-18T14:00:00Z",
+    "fecha_hora_fin": "2025-11-18T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 174,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-21T14:00:00Z",
+    "fecha_hora_fin": "2025-11-21T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 175,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-24T14:00:00Z",
+    "fecha_hora_fin": "2025-11-24T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 176,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-25T14:00:00Z",
+    "fecha_hora_fin": "2025-11-25T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 177,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-11-28T14:00:00Z",
+    "fecha_hora_fin": "2025-11-28T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 178,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-01T14:00:00Z",
+    "fecha_hora_fin": "2025-12-01T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 179,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-02T14:00:00Z",
+    "fecha_hora_fin": "2025-12-02T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 180,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-05T14:00:00Z",
+    "fecha_hora_fin": "2025-12-05T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 181,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-08T14:00:00Z",
+    "fecha_hora_fin": "2025-12-08T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 182,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-09T14:00:00Z",
+    "fecha_hora_fin": "2025-12-09T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 183,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-12T14:00:00Z",
+    "fecha_hora_fin": "2025-12-12T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 184,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-15T14:00:00Z",
+    "fecha_hora_fin": "2025-12-15T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 185,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-16T14:00:00Z",
+    "fecha_hora_fin": "2025-12-16T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 186,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-19T14:00:00Z",
+    "fecha_hora_fin": "2025-12-19T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 187,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-22T14:00:00Z",
+    "fecha_hora_fin": "2025-12-22T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 188,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-23T14:00:00Z",
+    "fecha_hora_fin": "2025-12-23T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 189,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-26T14:00:00Z",
+    "fecha_hora_fin": "2025-12-26T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 190,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-29T14:00:00Z",
+    "fecha_hora_fin": "2025-12-29T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 191,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2025-12-30T14:00:00Z",
+    "fecha_hora_fin": "2025-12-30T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 192,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2026-01-02T14:00:00Z",
+    "fecha_hora_fin": "2026-01-02T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 193,
+  "fields": {
+    "serie": 12,
+    "laboratorio": 3,
+    "profesor": "Santiago",
+    "materia": "Redes",
+    "fecha_hora_inicio": "2026-01-05T14:00:00Z",
+    "fecha_hora_fin": "2026-01-05T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 194,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-01-26T14:00:00Z",
+    "fecha_hora_fin": "2026-01-26T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 195,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-01-27T14:00:00Z",
+    "fecha_hora_fin": "2026-01-27T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 196,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-01-28T14:00:00Z",
+    "fecha_hora_fin": "2026-01-28T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 197,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-01-29T14:00:00Z",
+    "fecha_hora_fin": "2026-01-29T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 198,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-01-30T14:00:00Z",
+    "fecha_hora_fin": "2026-01-30T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 199,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-02T14:00:00Z",
+    "fecha_hora_fin": "2026-02-02T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 200,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-03T14:00:00Z",
+    "fecha_hora_fin": "2026-02-03T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 201,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-04T14:00:00Z",
+    "fecha_hora_fin": "2026-02-04T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 202,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-05T14:00:00Z",
+    "fecha_hora_fin": "2026-02-05T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 203,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-06T14:00:00Z",
+    "fecha_hora_fin": "2026-02-06T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 204,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-09T14:00:00Z",
+    "fecha_hora_fin": "2026-02-09T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 205,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-10T14:00:00Z",
+    "fecha_hora_fin": "2026-02-10T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 206,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-11T14:00:00Z",
+    "fecha_hora_fin": "2026-02-11T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 207,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-12T14:00:00Z",
+    "fecha_hora_fin": "2026-02-12T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 208,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-13T14:00:00Z",
+    "fecha_hora_fin": "2026-02-13T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 209,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-16T14:00:00Z",
+    "fecha_hora_fin": "2026-02-16T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 210,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-17T14:00:00Z",
+    "fecha_hora_fin": "2026-02-17T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 211,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-18T14:00:00Z",
+    "fecha_hora_fin": "2026-02-18T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 212,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-19T14:00:00Z",
+    "fecha_hora_fin": "2026-02-19T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 213,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-20T14:00:00Z",
+    "fecha_hora_fin": "2026-02-20T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 214,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-23T14:00:00Z",
+    "fecha_hora_fin": "2026-02-23T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 215,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-24T14:00:00Z",
+    "fecha_hora_fin": "2026-02-24T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 216,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-25T14:00:00Z",
+    "fecha_hora_fin": "2026-02-25T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 217,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-26T14:00:00Z",
+    "fecha_hora_fin": "2026-02-26T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 218,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-02-27T14:00:00Z",
+    "fecha_hora_fin": "2026-02-27T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 219,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-03-02T14:00:00Z",
+    "fecha_hora_fin": "2026-03-02T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 220,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-03-03T14:00:00Z",
+    "fecha_hora_fin": "2026-03-03T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 221,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-03-04T14:00:00Z",
+    "fecha_hora_fin": "2026-03-04T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 222,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-03-05T14:00:00Z",
+    "fecha_hora_fin": "2026-03-05T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 223,
+  "fields": {
+    "serie": 13,
+    "laboratorio": 1,
+    "profesor": "Betty",
+    "materia": "Base de datos",
+    "fecha_hora_inicio": "2026-03-06T14:00:00Z",
+    "fecha_hora_fin": "2026-03-06T15:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 224,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-06T19:00:00Z",
+    "fecha_hora_fin": "2025-11-06T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 225,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-07T19:00:00Z",
+    "fecha_hora_fin": "2025-11-07T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 226,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-13T19:00:00Z",
+    "fecha_hora_fin": "2025-11-13T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 227,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-14T19:00:00Z",
+    "fecha_hora_fin": "2025-11-14T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 228,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-20T19:00:00Z",
+    "fecha_hora_fin": "2025-11-20T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 229,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-21T19:00:00Z",
+    "fecha_hora_fin": "2025-11-21T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 230,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-27T19:00:00Z",
+    "fecha_hora_fin": "2025-11-27T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.reservaclase",
+  "pk": 231,
+  "fields": {
+    "serie": 14,
+    "laboratorio": 1,
+    "profesor": "Prueba",
+    "materia": "Prueba",
+    "fecha_hora_inicio": "2025-11-28T19:00:00Z",
+    "fecha_hora_fin": "2025-11-28T20:00:00Z"
+  }
+},
+{
+  "model": "gestion.visita",
+  "pk": 20,
+  "fields": {
+    "estudiante": "338227",
+    "pc": 2,
+    "software_utilizado": 2,
+    "fecha_hora_inicio": "2025-10-20T18:53:55.777Z",
+    "fecha_hora_fin": "2025-10-20T19:00:47.698Z"
+  }
+},
+{
+  "model": "gestion.visita",
+  "pk": 21,
+  "fields": {
+    "estudiante": "349388",
+    "pc": 2,
+    "software_utilizado": 1,
+    "fecha_hora_inicio": "2025-11-18T16:52:47.941Z",
+    "fecha_hora_fin": "2025-11-18T16:54:04.110Z"
+  }
+},
+{
+  "model": "gestion.visita",
+  "pk": 24,
+  "fields": {
+    "estudiante": "336685",
+    "pc": 293,
+    "software_utilizado": 15,
+    "fecha_hora_inicio": "2025-11-20T19:29:29.607Z",
+    "fecha_hora_fin": "2025-11-20T19:33:25.542Z"
+  }
+},
+{
+  "model": "gestion.visita",
+  "pk": 25,
+  "fields": {
+    "estudiante": "336685",
+    "pc": 202,
+    "software_utilizado": 15,
+    "fecha_hora_inicio": "2025-11-20T19:36:08.594Z",
+    "fecha_hora_fin": null
+  }
+}
+]

@@ -3,11 +3,31 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Environments
+# Environments - IMPORTANTE: Protege tus credenciales
 .env
+.env.local
+.env.*.local
 venv/
 env/
+ENV/
 
 # Django stuff:
 *.log
 db.sqlite3
+*.sqlite3
+
+# Archivos de backup que pueden contener datos sensibles
+backups/*.sql
+*.sql
+*.dump
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

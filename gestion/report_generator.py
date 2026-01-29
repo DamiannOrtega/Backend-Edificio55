@@ -8,13 +8,21 @@ from reportlab.graphics.shapes import Drawing, Rect
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics import renderPDF
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 from io import BytesIO
 import pandas as pd
 from datetime import datetime
 from django.utils import timezone
 from .models import Visita, Laboratorio, Software, Estudiante
 from django.db.models import Q, Count
+from django.conf import settings
 import os
+try:
+    from svglib.svglib import svg2rlg
+    SVG_SUPPORT = True
+except ImportError:
+    SVG_SUPPORT = False
 
 
 class ReportGenerator:
@@ -28,29 +36,58 @@ class ReportGenerator:
         self.styles.add(ParagraphStyle(
             name='CustomTitle',
             parent=self.styles['Heading1'],
-            fontSize=24,
-            spaceAfter=30,
+            fontSize=28,
+            spaceAfter=20,
             alignment=TA_CENTER,
-            textColor=colors.HexColor('#1e40af')
+            textColor=colors.HexColor('#063579'),
+            fontName='Helvetica-Bold',
+            leading=32
         ))
         
         # Estilo para subtítulos
         self.styles.add(ParagraphStyle(
             name='CustomSubtitle',
             parent=self.styles['Heading2'],
-            fontSize=16,
-            spaceAfter=20,
+            fontSize=18,
+            spaceAfter=15,
             alignment=TA_LEFT,
-            textColor=colors.HexColor('#374151')
+            textColor=colors.HexColor('#1e293b'),
+            fontName='Helvetica-Bold',
+            leading=22
+        ))
+        
+        # Estilo para subtítulos centrados
+        self.styles.add(ParagraphStyle(
+            name='CustomSubtitleCenter',
+            parent=self.styles['Heading2'],
+            fontSize=16,
+            spaceAfter=15,
+            alignment=TA_CENTER,
+            textColor=colors.HexColor('#475569'),
+            fontName='Helvetica',
+            leading=20
         ))
         
         # Estilo para texto normal
         self.styles.add(ParagraphStyle(
             name='CustomNormal',
             parent=self.styles['Normal'],
-            fontSize=10,
-            spaceAfter=12,
-            alignment=TA_LEFT
+            fontSize=11,
+            spaceAfter=10,
+            alignment=TA_LEFT,
+            fontName='Helvetica',
+            leading=14
+        ))
+        
+        # Estilo para texto normal centrado
+        self.styles.add(ParagraphStyle(
+            name='CustomNormalCenter',
+            parent=self.styles['Normal'],
+            fontSize=11,
+            spaceAfter=10,
+            alignment=TA_CENTER,
+            fontName='Helvetica',
+            leading=14
         ))
         
         # Estilo para encabezados de tabla
@@ -59,7 +96,8 @@ class ReportGenerator:
             parent=self.styles['Normal'],
             fontSize=10,
             alignment=TA_CENTER,
-            textColor=colors.white
+            textColor=colors.white,
+            fontName='Helvetica-Bold'
         ))
 
     def generate_pdf_report(self, filters, output_path=None):
@@ -70,10 +108,10 @@ class ReportGenerator:
         doc = SimpleDocTemplate(
             output_path,
             pagesize=A4,
-            rightMargin=72,
-            leftMargin=72,
-            topMargin=72,
-            bottomMargin=18
+            rightMargin=50,
+            leftMargin=50,
+            topMargin=60,
+            bottomMargin=50
         )
         
         story = []
@@ -114,38 +152,86 @@ class ReportGenerator:
         """Crear página de portada del reporte"""
         elements = []
         
-        # Logo/Header
-        elements.append(Spacer(1, 2*inch))
+        # Logo de la UAA
+        logo_path = os.path.join(settings.BASE_DIR, 'static', 'img', 'logo.svg')
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'logo.svg')
+        
+        if os.path.exists(logo_path) and SVG_SUPPORT:
+            try:
+                # Intentar cargar SVG usando svglib
+                drawing = svg2rlg(logo_path)
+                if drawing:
+                    # Escalar el logo apropiadamente
+                    original_width = drawing.width
+                    original_height = drawing.height
+                    target_width = 2.5 * inch
+                    scale_factor = target_width / original_width
+                    drawing.width = target_width
+                    drawing.height = original_height * scale_factor
+                    drawing.scale(scale_factor, scale_factor)
+                    # Centrar el logo usando una tabla
+                    logo_table = Table([[drawing]], colWidths=[7*inch])
+                    logo_table.setStyle(TableStyle([
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                        ('TOPPADDING', (0, 0), (-1, -1), 0),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+                    ]))
+                    elements.append(logo_table)
+                    elements.append(Spacer(1, 0.3*inch))
+            except Exception as e:
+                # Si falla, continuar sin logo
+                print(f"No se pudo cargar el logo SVG: {e}")
+                elements.append(Spacer(1, 1.5*inch))
+        else:
+            elements.append(Spacer(1, 1.5*inch))
         
         # Título principal
         title = Paragraph("REPORTE DE USO DE LABORATORIOS", self.styles['CustomTitle'])
         elements.append(title)
         
-        elements.append(Spacer(1, 0.5*inch))
+        elements.append(Spacer(1, 0.4*inch))
         
-        # Subtítulo
-        subtitle = Paragraph("Edificio 55 - Universidad Autónoma de Aguascalientes", self.styles['CustomSubtitle'])
+        # Subtítulo con información institucional
+        subtitle_text = """
+        <b>Edificio 55</b><br/>
+        Departamento de Sistemas de Información<br/>
+        Universidad Autónoma de Aguascalientes
+        """
+        subtitle = Paragraph(subtitle_text, self.styles['CustomSubtitleCenter'])
         elements.append(subtitle)
         
-        elements.append(Spacer(1, 1*inch))
+        elements.append(Spacer(1, 0.8*inch))
         
-        # Información del período
+        # Información del período en un formato más formal
         period_info = self._get_period_info(filters)
-        period_text = Paragraph(f"<b>Período de Análisis:</b> {period_info}", self.styles['CustomNormal'])
+        period_text = Paragraph(
+            f"<b>Período de Análisis:</b><br/>{period_info}",
+            self.styles['CustomNormalCenter']
+        )
         elements.append(period_text)
         
         # Filtros aplicados
         filters_text = self._get_filters_text(filters)
         if filters_text:
             elements.append(Spacer(1, 0.3*inch))
-            filters_para = Paragraph(f"<b>Filtros Aplicados:</b><br/>{filters_text}", self.styles['CustomNormal'])
+            filters_para = Paragraph(
+                f"<b>Filtros Aplicados:</b><br/>{filters_text}",
+                self.styles['CustomNormalCenter']
+            )
             elements.append(filters_para)
         
-        elements.append(Spacer(1, 1*inch))
+        elements.append(Spacer(1, 1.2*inch))
         
         # Fecha de generación
-        current_date = timezone.localtime(timezone.now()).strftime("%d de %B de %Y")
-        date_text = Paragraph(f"<b>Fecha de Generación:</b> {current_date}", self.styles['CustomNormal'])
+        current_date = timezone.localtime(timezone.now())
+        date_text = Paragraph(
+            f"<b>Fecha de Generación:</b><br/>{current_date.strftime('%d de %B de %Y')}<br/>{current_date.strftime('%H:%M horas')}",
+            self.styles['CustomNormalCenter']
+        )
         elements.append(date_text)
         
         return elements
@@ -170,17 +256,25 @@ class ReportGenerator:
             ['Usuarios Únicos', f"{stats['sesiones_unicas']:,}", 'Número de usuarios distintos'],
         ]
         
-        summary_table = Table(summary_data, colWidths=[2*inch, 1.5*inch, 3*inch])
+        summary_table = Table(summary_data, colWidths=[2.2*inch, 1.8*inch, 3*inch])
         summary_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#063579')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+            ('TOPPADDING', (0, 0), (-1, 0), 14),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ffffff')),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
             ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('TOPPADDING', (0, 1), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
         ]))
         
         elements.append(summary_table)
@@ -216,17 +310,24 @@ class ReportGenerator:
                     f"{avg_time:.1f}h"
                 ])
             
-            lab_table = Table(lab_data, colWidths=[2*inch, 1.5*inch, 1.5*inch, 1.5*inch])
+            lab_table = Table(lab_data, colWidths=[2.2*inch, 1.5*inch, 1.5*inch, 1.5*inch])
             lab_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#059669')),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#063579')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 11),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f0fdf4')),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+                ('TOPPADDING', (0, 0), (-1, 0), 14),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
             ]))
             
             elements.append(lab_table)
@@ -247,17 +348,24 @@ class ReportGenerator:
                     f"{percentage:.1f}%"
                 ])
             
-            soft_table = Table(soft_data, colWidths=[3*inch, 1.5*inch, 1.5*inch])
+            soft_table = Table(soft_data, colWidths=[3.5*inch, 1.5*inch, 1.5*inch])
             soft_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc2626')),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#063579')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 11),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#fef2f2')),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+                ('TOPPADDING', (0, 0), (-1, 0), 14),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
             ]))
             
             elements.append(soft_table)
@@ -325,15 +433,22 @@ class ReportGenerator:
             
             users_table = Table(users_data, colWidths=[3*inch, 1.2*inch, 1.2*inch, 1.2*inch])
             users_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#7c3aed')),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#063579')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 11),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#faf5ff')),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 14),
+                ('TOPPADDING', (0, 0), (-1, 0), 14),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 8),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+                ('TOPPADDING', (0, 1), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
             ]))
             
             elements.append(users_table)
@@ -390,24 +505,25 @@ class ReportGenerator:
             visits_table = Table(visits_data, colWidths=[1.3*inch, 0.6*inch, 0.9*inch, 1*inch, 1.1*inch, 1.1*inch, 0.7*inch])
             visits_table.setStyle(TableStyle([
                 # Encabezado
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e40af')),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#063579')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('ALIGN', (0, 1), (0, -1), 'LEFT'),  # Estudiante alineado a la izquierda
                 ('ALIGN', (3, 1), (3, -1), 'LEFT'),  # Software alineado a la izquierda
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 9),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
                 ('TOPPADDING', (0, 0), (-1, 0), 12),
                 # Filas alternadas
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#ffffff'), colors.HexColor('#f8fafc')]),
-                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e5e7eb')),
-                ('FONTSIZE', (0, 1), (-1, -1), 7),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 1), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+                ('FONTSIZE', (0, 1), (-1, -1), 8),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
             ]))
             
             elements.append(visits_table)

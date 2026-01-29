@@ -270,14 +270,41 @@ class MantenimientoAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def save_model(self, request, obj, form, change):
-        """Sobrescribe el método save para manejar el campo laboratorio"""
-        # El campo laboratorio es solo para filtrado, no se guarda
-        # La PC ya tiene el laboratorio asociado
+        """Sobrescribe el método save para:
+        - Manejar el campo laboratorio (solo filtrado, no se guarda)
+        - Asegurar que la PC cambie a estado 'Mantenimiento' cuando haya un mantenimiento activo
+        - Opcionalmente devolver la PC a 'Disponible' si el mantenimiento se marca como finalizado aquí
+        """
+        from django.utils import timezone
+
+        original_fecha_fin = None
+        if change:
+            # Obtener el estado anterior del mantenimiento
+            try:
+                original = Mantenimiento.objects.get(pk=obj.pk)
+                original_fecha_fin = original.fecha_fin
+            except Mantenimiento.DoesNotExist:
+                pass
+
         # Establecer fecha_inicio por defecto si no está establecida
         if not obj.fecha_inicio:
-            from django.utils import timezone
             obj.fecha_inicio = timezone.now()
+
         super().save_model(request, obj, form, change)
+
+        # Si el mantenimiento NO tiene fecha_fin, considerarlo activo
+        if obj.pc:
+            if obj.fecha_fin is None:
+                # Asegurar que la PC esté en estado 'Mantenimiento'
+                if obj.pc.estado != "Mantenimiento":
+                    obj.pc.estado = "Mantenimiento"
+                    obj.pc.save()
+            else:
+                # Si antes no tenía fecha_fin (activo) y ahora sí, podemos devolver la PC a 'Disponible'
+                # (esto cubre el caso de que el admin edite manualmente sin usar el botón de finalizar)
+                if original_fecha_fin is None and obj.pc.estado == "Mantenimiento":
+                    obj.pc.estado = "Disponible"
+                    obj.pc.save()
     
     def get_queryset(self, request):
         """Optimizar consultas para evitar N+1 queries"""

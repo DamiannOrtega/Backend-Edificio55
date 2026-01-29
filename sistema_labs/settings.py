@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g0--eci@)-s7x+ymp6l@9l+)k$4zg0m((pq%9b*la=vu)km!!*'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-g0--eci@)-s7x+ymp6l@9l+)k$4zg0m((pq%9b*la=vu)km!!*')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
@@ -79,14 +80,29 @@ WSGI_APPLICATION = 'sistema_labs.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Edificio55',         
-        'USER': 'postgres',           
-        'PASSWORD': 'Damian27052001',  
-        'HOST': 'localhost',          # 'localhost' significa que está en la misma PC
-        'PORT': '5432',               # El puerto por defecto de PostgreSQL
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': config('DB_NAME', default='postgres'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
+        'OPTIONS': {
+            'sslmode': config('DB_SSLMODE', default='require'),
+        },
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'Edificio55',
+#         'USER': 'postgres',
+#         'PASSWORD': 'Damian27052001',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 
 
 # Password validation
