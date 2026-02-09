@@ -7,11 +7,17 @@ set LOCAL_DB_HOST=localhost
 set LOCAL_DB_PORT=5432
 
 REM Configuración de Supabase
-set SUPABASE_DB_NAME=postgres
-set SUPABASE_DB_USER=postgres.zrtbnovaxukwsyomasfx
-set SUPABASE_DB_PASSWORD=Damian27052001
-set SUPABASE_DB_HOST=aws-1-us-east-1.pooler.supabase.com
-set SUPABASE_DB_PORT=5432
+REM IMPORTANTE: Las credenciales se leen del archivo .env
+REM No incluyas credenciales directamente en este archivo
+
+REM Leer credenciales del archivo .env
+for /f "tokens=1,2 delims==" %%a in ('type .env ^| findstr /v "^#"') do (
+    if "%%a"=="DB_NAME" set SUPABASE_DB_NAME=%%b
+    if "%%a"=="DB_USER" set SUPABASE_DB_USER=%%b
+    if "%%a"=="DB_PASSWORD" set SUPABASE_DB_PASSWORD=%%b
+    if "%%a"=="DB_HOST" set SUPABASE_DB_HOST=%%b
+    if "%%a"=="DB_PORT" set SUPABASE_DB_PORT=%%b
+)
 
 echo Exportando datos desde base de datos local...
 pg_dump -h %LOCAL_DB_HOST% -p %LOCAL_DB_PORT% -U %LOCAL_DB_USER% -d %LOCAL_DB_NAME% -F c -f backup_local.dump

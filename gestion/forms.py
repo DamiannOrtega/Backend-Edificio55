@@ -1,7 +1,107 @@
 # gestion/forms.py
 from django import forms
-from .models import Laboratorio, PC, Mantenimiento
+from .models import Laboratorio, PC, Mantenimiento, Estudiante, SerieReserva
 from django.utils import timezone
+
+# Lista de carreras de la UAA
+CARRERAS_CHOICES = [
+    ('', '-- Selecciona una carrera --'),
+    ('Arquitectura', 'Arquitectura'),
+    ('Contador Público', 'Contador Público'),
+    ('Ing. Automotriz', 'Ing. Automotriz'),
+    ('Ing. Biomédica', 'Ing. Biomédica'),
+    ('Ing. Bioquímica', 'Ing. Bioquímica'),
+    ('Ing. Civil', 'Ing. Civil'),
+    ('Ing. Agronomía', 'Ing. Agronomía'),
+    ('Ing. en Alimentos', 'Ing. en Alimentos'),
+    ('Ing. en Computación Inteligente', 'Ing. en Computación Inteligente'),
+    ('Ing. en Diseño Mecánico', 'Ing. en Diseño Mecánico'),
+    ('Ing. en Electrónica', 'Ing. en Electrónica'),
+    ('Ing. en Energías Renovables', 'Ing. en Energías Renovables'),
+    ('Ing. en Manufactura y Automatización Industrial', 'Ing. en Manufactura y Automatización Industrial'),
+    ('Ing. en Robótica', 'Ing. en Robótica'),
+    ('Ing. en Sistemas Computacionales', 'Ing. en Sistemas Computacionales'),
+    ('Ing. Industrial Estadístico', 'Ing. Industrial Estadístico'),
+    ('Lic. en Actuación', 'Lic. en Actuación'),
+    ('Lic. en Administración de Empresas', 'Lic. en Administración de Empresas'),
+    ('Lic. en Administración de la Producción y Servicios', 'Lic. en Administración de la Producción y Servicios'),
+    ('Lic. en Administración Financiera', 'Lic. en Administración Financiera'),
+    ('Lic. en Administración y Gestión Fiscal de PYMES', 'Lic. en Administración y Gestión Fiscal de PYMES'),
+    ('Lic. en Agronegocios', 'Lic. en Agronegocios'),
+    ('Lic. en Artes Cinematográficas y Audiovisuales', 'Lic. en Artes Cinematográficas y Audiovisuales'),
+    ('Lic. en Asesoría Psicopedagógica', 'Lic. en Asesoría Psicopedagógica'),
+    ('Lic. en Biología', 'Lic. en Biología'),
+    ('Lic. en Biotecnología', 'Lic. en Biotecnología'),
+    ('Lic. en Ciencias Políticas y Administración Pública', 'Lic. en Ciencias Políticas y Administración Pública'),
+    ('Lic. en Comercio Electrónico', 'Lic. en Comercio Electrónico'),
+    ('Lic. en Comercio Internacional', 'Lic. en Comercio Internacional'),
+    ('Lic. en Comunicación e Información', 'Lic. en Comunicación e Información'),
+    ('Lic. en Comunicación Corporativa Estratégica', 'Lic. en Comunicación Corporativa Estratégica'),
+    ('Lic. en Cultura Física y Deporte', 'Lic. en Cultura Física y Deporte'),
+    ('Lic. en Derecho', 'Lic. en Derecho'),
+    ('Lic. en Desarrollo de Videojuegos y Entornos Virtuales (modalidad virtual)', 'Lic. en Desarrollo de Videojuegos y Entornos Virtuales (modalidad virtual)'),
+    ('Lic. en Diseño de Interiores', 'Lic. en Diseño de Interiores'),
+    ('Lic. en Diseño de Modas en Indumentaria y Textiles', 'Lic. en Diseño de Modas en Indumentaria y Textiles'),
+    ('Lic. en Diseño Gráfico', 'Lic. en Diseño Gráfico'),
+    ('Lic. en Diseño Industrial', 'Lic. en Diseño Industrial'),
+    ('Lic. en Docencia de Francés y Español como Lenguas Extranjeras', 'Lic. en Docencia de Francés y Español como Lenguas Extranjeras'),
+    ('Lic. en Docencia del Idioma Inglés', 'Lic. en Docencia del Idioma Inglés'),
+    ('Lic. en Economía', 'Lic. en Economía'),
+    ('Lic. en Enfermería', 'Lic. en Enfermería'),
+    ('Lic. en Estudios del Arte y Gestión Cultural', 'Lic. en Estudios del Arte y Gestión Cultural'),
+    ('Lic. en Filosofía', 'Lic. en Filosofía'),
+    ('Lic. en Gestión Turística', 'Lic. en Gestión Turística'),
+    ('Lic. en Historia', 'Lic. en Historia'),
+    ('Lic. en Informática y Tecnologías Computacionales', 'Lic. en Informática y Tecnologías Computacionales'),
+    ('Lic. en Letras Hispánicas', 'Lic. en Letras Hispánicas'),
+    ('Lic. en Logística Empresarial', 'Lic. en Logística Empresarial'),
+    ('Lic. en Matemáticas Aplicadas', 'Lic. en Matemáticas Aplicadas'),
+    ('Lic. en Mercadotecnia', 'Lic. en Mercadotecnia'),
+    ('Lic. en Música', 'Lic. en Música'),
+    ('Lic. en Nutrición', 'Lic. en Nutrición'),
+    ('Lic. en Optometría', 'Lic. en Optometría'),
+    ('Lic. en Psicología', 'Lic. en Psicología'),
+    ('Lic. en Relaciones Industriales', 'Lic. en Relaciones Industriales'),
+    ('Lic. en Sociología', 'Lic. en Sociología'),
+    ('Lic. en Terapia Física', 'Lic. en Terapia Física'),
+    ('Lic. en Trabajo Social', 'Lic. en Trabajo Social'),
+    ('Lic. en Urbanismo', 'Lic. en Urbanismo'),
+    ('Médico Cirujano', 'Médico Cirujano'),
+    ('Médico Estomatólogo', 'Médico Estomatólogo'),
+    ('Médico Veterinario Zootecnista', 'Médico Veterinario Zootecnista'),
+    ('Químico Farmacéutico Biólogo', 'Químico Farmacéutico Biólogo'),
+]
+
+class EstudianteAdminForm(forms.ModelForm):
+    """Formulario personalizado para el admin de Estudiante con dropdown de carreras"""
+    
+    carrera = forms.ChoiceField(
+        choices=CARRERAS_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'vTextField'}),
+        label='Carrera'
+    )
+    
+    class Meta:
+        model = Estudiante
+        fields = '__all__'
+
+
+class SerieReservaAdminForm(forms.ModelForm):
+    """Formulario personalizado para el admin de SerieReserva con dropdown de carreras"""
+    
+    carrera = forms.ChoiceField(
+        choices=CARRERAS_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'vTextField'}),
+        label='Carrera'
+    )
+    
+    class Meta:
+        model = SerieReserva
+        fields = '__all__'
+
+
 
 class RecurrenciaForm(forms.Form):
     DIAS_SEMANA = [

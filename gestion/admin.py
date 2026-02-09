@@ -1,8 +1,9 @@
 from django.contrib import admin
-from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana, Mantenimiento
+from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana, Mantenimiento, SesionActiva, CalendarioSemanal
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
-from .forms import RecurrenciaForm, MantenimientoForm
+from .forms import RecurrenciaForm, MantenimientoForm, EstudianteAdminForm, SerieReservaAdminForm
+from .widgets import ColorPickerWidget
 from datetime import timedelta, datetime
 from django.urls import path
 from django.utils.html import format_html
@@ -155,9 +156,12 @@ class VisitaAdmin(admin.ModelAdmin):
 
 class EstudianteAdmin(admin.ModelAdmin):
     """Administración mejorada para Visitantes (Estudiantes)"""
+    form = EstudianteAdminForm  # Usar formulario personalizado con dropdown de carreras
+    
     list_display = (
         'id', 
         'nombre_completo', 
+        'carrera',
         'correo', 
         'get_fecha_primer_registro',
         'get_total_visitas',
@@ -165,8 +169,8 @@ class EstudianteAdmin(admin.ModelAdmin):
         'get_ultima_visita'
     )
     
-    list_filter = ('visita__fecha_hora_inicio',)
-    search_fields = ('id', 'nombre_completo', 'correo')
+    list_filter = ('visita__fecha_hora_inicio', 'carrera')
+    search_fields = ('id', 'nombre_completo', 'correo', 'carrera')
     ordering = ('nombre_completo',)
     
     def get_queryset(self, request):
@@ -422,6 +426,136 @@ class ReservaClaseAdmin(admin.ModelAdmin):
         if db_field.name == "laboratorio":
             kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """Use color picker widget for color field"""
+        if db_field.name == 'color':
+            kwargs['widget'] = ColorPickerWidget()
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+    
+    def get_urls(self):
+        """Add custom URLs for calendar view"""
+        urls = super().get_urls()
+        custom_urls = [
+            path('calendario-semanal/', self.admin_site.admin_view(self.calendario_semanal_view), name='gestion_reservaclase_calendario'),
+        ]
+        return custom_urls + urls
+    
+    def changelist_view(self, request, extra_context=None):
+        """Add calendar link to the changelist view"""
+        extra_context = extra_context or {}
+        extra_context['show_calendario_link'] = True
+        return super().changelist_view(request, extra_context)
+    
+    def calendario_semanal_view(self, request):
+        """Vista del calendario semanal"""
+        from datetime import datetime, timedelta, time
+        from django.utils import timezone
+        from collections import defaultdict
+        
+        # Get week offset (0 = current week, -1 = previous week, 1 = next week)
+        week_offset = int(request.GET.get('week_offset', 0))
+        
+        # Get selected laboratory
+        selected_lab = request.GET.get('laboratorio', '')
+        
+        # Get custom date if provided
+        custom_date = request.GET.get('date', '')
+        
+        # Calculate week start (Monday) and end (Friday)
+        if custom_date:
+            try:
+                selected_date = datetime.strptime(custom_date, '%Y-%m-%d').date()
+                days_since_monday = selected_date.weekday()
+                week_start = selected_date - timedelta(days=days_since_monday)
+            except ValueError:
+                today = timezone.now().date()
+                days_since_monday = today.weekday()
+                week_start = today - timedelta(days=days_since_monday) + timedelta(weeks=week_offset)
+        else:
+            today = timezone.now().date()
+            days_since_monday = today.weekday()  # 0 = Monday, 6 = Sunday
+            week_start = today - timedelta(days=days_since_monday) + timedelta(weeks=week_offset)
+        
+        week_end = week_start + timedelta(days=4)  # Friday
+        
+        # Generate time slots in compact format (7:00-8:00, 8:00-9:00, etc.)
+        time_slots = []
+        for hour in range(7, 21):  # 7 AM to 9 PM (last slot is 20:00-21:00)
+            time_slots.append({
+                'start': f"{hour:02d}:00",
+                'end': f"{hour+1:02d}:00",
+                'display': f"{hour:02d}:00 - {hour+1:02d}:00",
+                'hour': hour
+            })
+        
+        # Get all laboratories
+        laboratorios = Laboratorio.objects.all().order_by('nombre')
+        
+        # Build query for reservations using datetime range to fix timezone
+        week_start_dt = timezone.make_aware(datetime.combine(week_start, time.min))
+        week_end_dt = timezone.make_aware(datetime.combine(week_end, time.max))
+        
+        reservas_query = ReservaClase.objects.filter(
+            fecha_hora_inicio__gte=week_start_dt,
+            fecha_hora_inicio__lte=week_end_dt
+        ).select_related('laboratorio', 'serie')
+        
+        # Filter by laboratory if selected
+        if selected_lab:
+            reservas_query = reservas_query.filter(laboratorio_id=selected_lab)
+        
+        reservas = reservas_query.order_by('fecha_hora_inicio')
+        
+        # Build days structure
+        days = []
+        day_names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+        
+        for i in range(5):  # Monday to Friday
+            day_date = week_start + timedelta(days=i)
+            day_reservations = defaultdict(list)
+            
+            # Get reservations for this day
+            day_reservas = [r for r in reservas if r.fecha_hora_inicio.date() == day_date]
+            
+            # Organize reservations by hour slot
+            for reserva in day_reservas:
+                # Get the hour of the reservation start time (in local time)
+                start_hour = reserva.fecha_hora_inicio.astimezone().hour
+                end_hour = reserva.fecha_hora_fin.astimezone().hour
+                
+                # Add reservation to all hour slots it spans
+                for hour in range(start_hour, end_hour):
+                    slot_key = f"{hour:02d}:00 - {hour+1:02d}:00"
+                    # Only add once per hour slot
+                    if reserva not in day_reservations[slot_key]:
+                        day_reservations[slot_key].append(reserva)
+            
+            days.append({
+                'date': day_date,
+                'name': day_names[i],
+                'reservations_by_slot': dict(day_reservations)
+            })
+        
+        # Get today's date for the date picker default
+        today_str = timezone.now().date().isoformat()
+        
+        context = {
+            'title': 'Calendario Semanal de Reservas',
+            'week_start': week_start,
+            'week_end': week_end,
+            'week_offset': week_offset,
+            'days': days,
+            'time_slots': time_slots,
+            'laboratorios': laboratorios,
+            'selected_lab': selected_lab,
+            'today_str': today_str,
+            'custom_date': custom_date or today_str,
+            'site_header': 'Administración de Edificio 55',
+            'site_title': 'Edificio 55',
+        }
+        
+        return render(request, 'admin/gestion/reservaclase/calendario_semanal.html', context)
 
 class ReservaClaseInline(admin.TabularInline):
     model = ReservaClase
@@ -434,17 +568,19 @@ class ReservaClaseInline(admin.TabularInline):
         return False
 
 class SerieReservaAdmin(admin.ModelAdmin):
+    form = SerieReservaAdminForm  # Usar formulario personalizado con dropdown de carreras
+    
     list_display = ('nombre', 'laboratorio', 'profesor', 'materia', 'fecha_inicio', 'fecha_fin', 'get_dias_display', 'get_horario', 'get_ocurrencias_count', 'activa')
     list_filter = ('laboratorio', 'profesor', 'activa', 'fecha_inicio')
     search_fields = ('nombre', 'profesor', 'materia', 'laboratorio__nombre')
     ordering = ('-creada_el',)
     date_hierarchy = 'fecha_inicio'
-    actions = ['regenerar_reservas', 'eliminar_reservas_existentes']
+    actions = ['regenerar_reservas', 'eliminar_reservas_existentes', 'actualizar_colores_reservas']
     inlines = [ReservaClaseInline]
     
     fieldsets = (
         ('Información General', {
-            'fields': ('nombre', 'laboratorio', 'profesor', 'materia')
+            'fields': ('nombre', 'laboratorio', 'profesor', 'materia', 'color', 'carrera', 'semestre', 'numero_alumnos')
         }),
         ('Horarios y Fechas', {
             'fields': ('fecha_inicio', 'fecha_fin', 'hora_inicio', 'hora_fin')
@@ -463,6 +599,12 @@ class SerieReservaAdmin(admin.ModelAdmin):
         if db_field.name == "laboratorio":
             kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """Use color picker widget for color field"""
+        if db_field.name == 'color':
+            kwargs['widget'] = ColorPickerWidget()
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
     
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         """Personaliza el queryset para ordenar los días de la semana correctamente"""
@@ -516,6 +658,17 @@ class SerieReservaAdmin(admin.ModelAdmin):
         
         self.message_user(request, f"Se eliminaron {total_eliminadas} reservas de {queryset.count()} serie(s).")
     eliminar_reservas_existentes.short_description = "Eliminar reservas existentes de las series seleccionadas"
+    
+    def actualizar_colores_reservas(self, request, queryset):
+        """Acción para actualizar los colores de las reservas existentes con el color de su serie"""
+        total_actualizadas = 0
+        for serie in queryset:
+            # Actualizar todas las reservas de esta serie con el color de la serie
+            actualizadas = serie.ocurrencias.update(color=serie.color)
+            total_actualizadas += actualizadas
+        
+        self.message_user(request, f"✅ Se actualizaron {total_actualizadas} reservas con los colores de {queryset.count()} serie(s).")
+    actualizar_colores_reservas.short_description = "Actualizar colores de reservas con el color de la serie"
     
     def save_model(self, request, obj, form, change):
         """Sobrescribe el método save para crear automáticamente las reservas recurrentes"""
@@ -579,7 +732,11 @@ class SerieReservaAdmin(admin.ModelAdmin):
                         profesor=serie.profesor,
                         materia=serie.materia,
                         fecha_hora_inicio=fecha_hora_inicio,
-                        fecha_hora_fin=fecha_hora_fin
+                        fecha_hora_fin=fecha_hora_fin,
+                        color=serie.color,  # Heredar el color de la serie
+                        carrera=serie.carrera,  # Heredar carrera
+                        semestre=serie.semestre,  # Heredar semestre
+                        numero_alumnos=serie.numero_alumnos  # Heredar número de alumnos
                     )
                     reservas_creadas += 1
                 else:
@@ -616,3 +773,141 @@ admin.site.register(Visita, VisitaAdmin)
 admin.site.register(SerieReserva, SerieReservaAdmin)
 admin.site.register(DiaSemana, DiaSemanaAdmin)
 admin.site.register(Mantenimiento, MantenimientoAdmin)
+
+
+# --- Admin para Sesiones Activas (Turno Vespertino) ---
+class SesionActivaAdmin(admin.ModelAdmin):
+    """
+    Admin para mostrar solo las sesiones activas (sin fecha_hora_fin).
+    Diseñado para el turno vespertino.
+    """
+    list_display = ('get_estudiante', 'get_id_estudiante', 'get_pc', 'get_laboratorio', 'software_utilizado', 'fecha_hora_inicio', 'get_tiempo_transcurrido', 'acciones')
+    list_filter = ('pc__laboratorio', 'fecha_hora_inicio')
+    search_fields = ('estudiante__nombre_completo', 'estudiante__id', 'pc__numero_pc')
+    ordering = ('-fecha_hora_inicio',)
+    
+    # Sobrescribir permisos para usar los de 'visita' en lugar de 'sesionactiva'
+    def has_module_permission(self, request):
+        """Permite ver el módulo si tiene permisos de visita"""
+        return request.user.has_perm('gestion.view_visita')
+    
+    def has_view_permission(self, request, obj=None):
+        """Permite ver si tiene permiso de view_visita"""
+        return request.user.has_perm('gestion.view_visita')
+    
+    def has_add_permission(self, request):
+        """No permitir agregar sesiones desde aquí"""
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        """No permitir editar directamente"""
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        """Permitir 'eliminar' (finalizar) si tiene permiso de delete_visita"""
+        return request.user.has_perm('gestion.delete_visita')
+    
+    def get_queryset(self, request):
+        """Mostrar solo sesiones activas (sin fecha_hora_fin)"""
+        qs = super().get_queryset(request)
+        return qs.filter(fecha_hora_fin__isnull=True)
+    
+    def get_estudiante(self, obj):
+        return obj.estudiante.nombre_completo
+    get_estudiante.short_description = 'Estudiante'
+    
+    def get_id_estudiante(self, obj):
+        return obj.estudiante.id
+    get_id_estudiante.short_description = 'ID Estudiante'
+    
+    def get_pc(self, obj):
+        return obj.pc
+    get_pc.short_description = 'PC'
+    
+    def get_laboratorio(self, obj):
+        return obj.pc.laboratorio.nombre
+    get_laboratorio.short_description = 'Laboratorio'
+    get_laboratorio.admin_order_field = 'pc__laboratorio__nombre'
+    
+    def get_tiempo_transcurrido(self, obj):
+        """Calcula el tiempo transcurrido desde el inicio"""
+        from django.utils import timezone
+        tiempo = timezone.now() - obj.fecha_hora_inicio
+        horas = int(tiempo.total_seconds() // 3600)
+        minutos = int((tiempo.total_seconds() % 3600) // 60)
+        return f'{horas}h {minutos}m'
+    get_tiempo_transcurrido.short_description = 'Tiempo Transcurrido'
+    
+    def acciones(self, obj):
+        """Botón para finalizar sesión"""
+        finalizar_url = reverse('admin:finalizar_sesion', args=[obj.pk])
+        return format_html(
+            '<a class="button" href="{}" style="background-color: #dc3545; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Finalizar Sesión</a>',
+            finalizar_url
+        )
+    acciones.short_description = 'Acciones'
+    
+    def get_urls(self):
+        """Agregar URL personalizada para finalizar sesión"""
+        urls = super().get_urls()
+        custom_urls = [
+            path('finalizar-sesion/<int:sesion_id>/', self.admin_site.admin_view(self.finalizar_sesion_view), name='finalizar_sesion'),
+        ]
+        return custom_urls + urls
+    
+    def finalizar_sesion_view(self, request, sesion_id):
+        """Vista para finalizar una sesión activa"""
+        from django.utils import timezone
+        
+        try:
+            sesion = Visita.objects.get(id=sesion_id, fecha_hora_fin__isnull=True)
+            
+            # Finalizar la sesión
+            sesion.fecha_hora_fin = timezone.now()
+            sesion.save()
+            
+            # Liberar la PC
+            if sesion.pc.estado == 'En Uso':
+                sesion.pc.estado = 'Disponible'
+                sesion.pc.save()
+            
+            messages.success(request, f'✅ Sesión de {sesion.estudiante.nombre_completo} en {sesion.pc} finalizada correctamente')
+            
+        except Visita.DoesNotExist:
+            messages.error(request, 'Sesión no encontrada o ya finalizada')
+        
+        return redirect('admin:gestion_sesionactiva_changelist')
+
+
+# --- Admin para Calendario Semanal (Acceso Directo) ---
+class CalendarioSemanalAdmin(admin.ModelAdmin):
+    """
+    Admin que redirige directamente al calendario semanal.
+    Aparece como una sección independiente en el menú lateral.
+    """
+    
+    class Media:
+        css = {
+            'all': ('admin/css/calendario_icon.css',)
+        }
+    
+    def has_module_permission(self, request):
+        """Mostrar en el menú si tiene permisos para ver reservas"""
+        return request.user.has_perm('gestion.view_reservaclase')
+    
+    def changelist_view(self, request, extra_context=None):
+        """Redirigir directamente al calendario semanal"""
+        return redirect('admin:gestion_reservaclase_calendario')
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+admin.site.register(SesionActiva, SesionActivaAdmin)
+admin.site.register(CalendarioSemanal, CalendarioSemanalAdmin)

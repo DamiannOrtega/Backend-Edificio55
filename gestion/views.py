@@ -263,6 +263,7 @@ def buscar_estudiante(request):
                 'nombre': estudiante.nombre_completo,
                 'correo': estudiante.correo,
                 'celular': estudiante.celular,
+                'carrera': estudiante.carrera,
             }
         except Estudiante.DoesNotExist:
             # Si no lo encontramos, la respuesta por defecto ('encontrado': False) es suficiente
@@ -312,14 +313,23 @@ def registrar_visita_api(request):
             nombre = data.get('nombre_completo')
             correo = data.get('correo')
             celular = data.get('celular')
+            carrera = data.get('carrera')
             pc_id = data.get('pc')
             software_id = data.get('software')
 
             # Buscamos o creamos al estudiante
             estudiante, creado = Estudiante.objects.get_or_create(
                 id=estudiante_id,
-                defaults={'nombre_completo': nombre, 'correo': correo, 'celular': celular}
+                defaults={'nombre_completo': nombre, 'correo': correo, 'celular': celular, 'carrera': carrera}
             )
+            
+            # Si el estudiante ya existía, actualizamos sus datos por si cambiaron
+            if not creado:
+                estudiante.nombre_completo = nombre
+                estudiante.correo = correo
+                estudiante.celular = celular
+                estudiante.carrera = carrera
+                estudiante.save()
 
             # Buscamos los objetos
             pc_seleccionada = PC.objects.get(id=pc_id)

@@ -1,0 +1,296 @@
+/* Calendario Semanal - Estilos */
+
+.calendario-container {
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.calendario-header {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendario-header h1 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.calendario-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.week-navigation {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.week-navigation button,
+.week-navigation .btn {
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.week-navigation button:hover,
+.week-navigation .btn:hover {
+    background: #2980b9;
+}
+
+.week-navigation .current-week {
+    background: #27ae60;
+}
+
+.week-navigation .current-week:hover {
+    background: #229954;
+}
+
+.week-info {
+    font-size: 16px;
+    color: #555;
+    font-weight: 500;
+}
+
+.lab-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lab-filter label {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.lab-filter select {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.calendario-grid-wrapper {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: auto;
+    max-height: calc(100vh - 250px);
+}
+
+.calendario-grid {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1200px;
+}
+
+.calendario-grid-header {
+    display: table-row;
+    background: #34495e;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.calendario-grid-header>div {
+    display: table-cell;
+    padding: 15px;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #2c3e50;
+    font-size: 14px;
+}
+
+.calendario-grid-header>div:first-child {
+    width: 100px;
+    background: #2c3e50;
+}
+
+.calendario-grid-row {
+    display: table-row;
+}
+
+.calendario-grid-row:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.time-cell {
+    display: table-cell;
+    padding: 15px 10px;
+    font-weight: 600;
+    text-align: center;
+    background: #ecf0f1;
+    border: 1px solid #ddd;
+    color: #2c3e50;
+    width: 100px;
+    vertical-align: top;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+.day-cell {
+    display: table-cell;
+    padding: 8px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+    min-height: 60px;
+    position: relative;
+    width: calc((100% - 100px) / 5);
+}
+
+.day-cell:hover {
+    background: #f0f8ff;
+}
+
+.reserva-item {
+    background: #667eea;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    line-height: 1.4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.reserva-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.reserva-materia {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reserva-profesor {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-bottom: 2px;
+}
+
+.reserva-horario {
+    font-size: 10px;
+    opacity: 0.8;
+    font-style: italic;
+}
+
+.reserva-lab {
+    font-size: 10px;
+    opacity: 0.85;
+    margin-top: 3px;
+    padding-top: 3px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.empty-cell {
+    color: #bdc3c7;
+    font-size: 11px;
+    text-align: center;
+    padding: 20px 5px;
+}
+
+.legend {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legend h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 30px;
+    height: 20px;
+    border-radius: 3px;
+}
+
+.no-reservas {
+    text-align: center;
+    padding: 40px;
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .calendario-grid {
+        min-width: 1000px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendario-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .week-navigation {
+        justify-content: center;
+    }
+
+    .lab-filter {
+        justify-content: center;
+    }
+}
+
+/* Print styles */
+@media print {
+    .calendario-controls {
+        display: none;
+    }
+
+    .calendario-grid-wrapper {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .reserva-item {
+        break-inside: avoid;
+    }
+}

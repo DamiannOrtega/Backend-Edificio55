@@ -1,0 +1,389 @@
+{% extends 'panel_vespertino/base.html' %}
+
+{% block title %}Mantenimientos - Panel Vespertino{% endblock %}
+{% block page_title %}Gestión de Mantenimientos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    select {
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .pcs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .pc-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .pc-card:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .pc-card.en-uso {
+        background: #fff3cd;
+        border-color: #ffc107;
+    }
+
+    .pc-card h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .pc-status {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .recent-maintenance {
+        margin-top: 40px;
+    }
+
+    .recent-maintenance h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .maintenance-list {
+        list-style: none;
+    }
+
+    .maintenance-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .maintenance-info {
+        flex: 1;
+    }
+
+    .maintenance-pc {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .maintenance-type {
+        color: #667eea;
+        font-size: 14px;
+    }
+
+    .maintenance-date {
+        color: #999;
+        font-size: 12px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-header {
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        color: #333;
+        font-size: 22px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 25px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #999;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="controls">
+    <label for="labSelect">Seleccionar Laboratorio:</label>
+    <select id="labSelect" onchange="cargarPCs()">
+        <option value="">-- Selecciona un laboratorio --</option>
+        {% for lab in laboratorios %}
+        <option value="{{ lab.id }}">{{ lab.nombre }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div id="pcsContainer" class="empty-state">
+    <p>Selecciona un laboratorio para ver sus equipos</p>
+</div>
+
+<div class="recent-maintenance">
+    <h2>Mantenimientos Recientes</h2>
+    <ul class="maintenance-list">
+        {% for mant in mantenimientos_recientes %}
+        <li class="maintenance-item">
+            <div class="maintenance-info">
+                <div class="maintenance-pc">{{ mant.pc.numero_pc }} - {{ mant.pc.laboratorio.nombre }}</div>
+                <div class="maintenance-type">{{ mant.tipo_mantenimiento }}</div>
+                <div class="maintenance-date">{{ mant.fecha_hora|date:"d/m/Y H:i" }}</div>
+            </div>
+        </li>
+        {% empty %}
+        <li class="empty-state">
+            <p>No hay mantenimientos registrados</p>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Modal de Registro de Mantenimiento -->
+<div id="mantenimientoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Registrar Mantenimiento</h2>
+            <p id="pcName" style="color: #666; margin-top: 5px;"></p>
+        </div>
+        <form id="mantenimientoForm">
+            <div class="form-group">
+                <label for="tipoMantenimiento">Tipo de Mantenimiento:</label>
+                <select id="tipoMantenimiento" required>
+                    <option value="">-- Selecciona un tipo --</option>
+                    <option value="Limpieza">Limpieza</option>
+                    <option value="Reparación">Reparación</option>
+                    <option value="Actualización">Actualización</option>
+                    <option value="Revisión">Revisión</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" placeholder="Describe el mantenimiento realizado..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<a href="{% url 'panel_vespertino_home' %}" class="btn btn-secondary" style="margin-top: 30px;">
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Volver al Inicio
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let pcSeleccionada = null;
+
+    async function cargarPCs() {
+        const labId = document.getElementById('labSelect').value;
+        const container = document.getElementById('pcsContainer');
+
+        if (!labId) {
+            container.innerHTML = '<p>Selecciona un laboratorio para ver sus equipos</p>';
+            container.className = 'empty-state';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/panel-vespertino/api/pcs-laboratorio/?laboratorio=${labId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                mostrarPCs(data.pcs);
+            }
+        } catch (error) {
+            console.error('Error al cargar PCs:', error);
+            alert('Error al cargar los equipos');
+        }
+    }
+
+    function mostrarPCs(pcs) {
+        const container = document.getElementById('pcsContainer');
+
+        if (pcs.length === 0) {
+            container.innerHTML = '<p>No hay equipos en este laboratorio</p>';
+            container.className = 'empty-state';
+            return;
+        }
+
+        container.className = 'pcs-grid';
+        container.innerHTML = '';
+
+        pcs.forEach(pc => {
+            const card = document.createElement('div');
+            card.className = `pc-card ${pc.en_uso ? 'en-uso' : ''}`;
+            card.onclick = () => abrirModalMantenimiento(pc);
+            card.innerHTML = `
+            <h3>${pc.numero_pc}</h3>
+            <div class="pc-status">${pc.en_uso ? 'En uso' : 'Disponible'}</div>
+        `;
+            container.appendChild(card);
+        });
+    }
+
+    function abrirModalMantenimiento(pc) {
+        pcSeleccionada = pc;
+        document.getElementById('pcName').textContent = pc.numero_pc;
+        document.getElementById('mantenimientoForm').reset();
+        document.getElementById('mantenimientoModal').classList.add('active');
+    }
+
+    function cerrarModal() {
+        document.getElementById('mantenimientoModal').classList.remove('active');
+        pcSeleccionada = null;
+    }
+
+    document.getElementById('mantenimientoForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        if (!pcSeleccionada) return;
+
+        const tipo = document.getElementById('tipoMantenimiento').value;
+        const descripcion = document.getElementById('descripcion').value;
+
+        if (!tipo) {
+            alert('Por favor selecciona un tipo de mantenimiento');
+            return;
+        }
+
+        try {
+            const response = await fetch('/panel-vespertino/api/registrar-mantenimiento/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    pc_id: pcSeleccionada.id,
+                    tipo: tipo,
+                    descripcion: descripcion
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.mensaje);
+                cerrarModal();
+                // Recargar la página para mostrar el nuevo mantenimiento
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al registrar el mantenimiento');
+        }
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

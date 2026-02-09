@@ -1,0 +1,438 @@
+{% extends 'panel_vespertino/base.html' %}
+
+{% block title %}Sesiones Activas - Panel Vespertino{% endblock %}
+{% block page_title %}Sesiones Activas{% endblock %}
+
+{% block extra_css %}
+<style>
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    select {
+        padding: 10px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .stat-card h3 {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    .stat-card .number {
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    thead {
+        background: #f8f9fa;
+    }
+
+    th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    td {
+        padding: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .btn-small {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+        stroke: #ccc;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-header {
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        color: #333;
+        font-size: 22px;
+    }
+
+    .modal-body {
+        margin-bottom: 25px;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="controls">
+    <div class="filter-group">
+        <label for="labFilter">Filtrar por laboratorio:</label>
+        <select id="labFilter" onchange="cargarSesiones()">
+            <option value="all">Todos los laboratorios</option>
+            {% for lab in laboratorios %}
+            <option value="{{ lab.id }}">{{ lab.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="cargarSesiones()">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        Actualizar
+    </button>
+</div>
+
+<div class="stats">
+    <div class="stat-card">
+        <h3>Sesiones Activas</h3>
+        <div class="number" id="totalSesiones">0</div>
+    </div>
+</div>
+
+<div class="table-container">
+    <div id="loading" class="loading">
+        Cargando sesiones...
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h3>No hay sesiones activas</h3>
+        <p>No se encontraron sesiones activas en este momento</p>
+    </div>
+
+    <table id="sesionesTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>Laboratorio</th>
+                <th>PC</th>
+                <th>Estudiante</th>
+                <th>ID</th>
+                <th>Hora Entrada</th>
+                <th>Tiempo</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="sesionesBody">
+        </tbody>
+    </table>
+</div>
+
+<div class="btn-group">
+    <button class="btn btn-danger" onclick="finalizarTodasLab()" id="btnFinalizarLab" style="display: none;">
+        Finalizar Todas del Laboratorio Seleccionado
+    </button>
+</div>
+
+<!-- Modal de Confirmación -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirmar Finalización</h2>
+        </div>
+        <div class="modal-body">
+            <p id="confirmMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarFinalizacion()">Sí, Finalizar</button>
+        </div>
+    </div>
+</div>
+
+<a href="{% url 'panel_vespertino_home' %}" class="btn btn-secondary" style="margin-top: 20px;">
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Volver al Inicio
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let sesionesActuales = [];
+    let sesionAFinalizar = null;
+    let labAFinalizar = null;
+
+    // Cargar sesiones al iniciar
+    document.addEventListener('DOMContentLoaded', function () {
+        cargarSesiones();
+        // Auto-refresh cada 30 segundos
+        setInterval(cargarSesiones, 30000);
+    });
+
+    async function cargarSesiones() {
+        const labFilter = document.getElementById('labFilter').value;
+        const loading = document.getElementById('loading');
+        const emptyState = document.getElementById('emptyState');
+        const table = document.getElementById('sesionesTable');
+
+        loading.style.display = 'block';
+        emptyState.style.display = 'none';
+        table.style.display = 'none';
+
+        try {
+            const response = await fetch(`/panel-vespertino/api/sesiones-activas/?laboratorio=${labFilter}`);
+            const data = await response.json();
+
+            if (data.success) {
+                sesionesActuales = data.sesiones;
+                mostrarSesiones(data.sesiones);
+                document.getElementById('totalSesiones').textContent = data.total;
+
+                // Mostrar/ocultar botón de finalizar laboratorio
+                const btnFinalizarLab = document.getElementById('btnFinalizarLab');
+                if (labFilter !== 'all' && data.total > 0) {
+                    btnFinalizarLab.style.display = 'inline-flex';
+                } else {
+                    btnFinalizarLab.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error al cargar sesiones:', error);
+            alert('Error al cargar las sesiones');
+        } finally {
+            loading.style.display = 'none';
+        }
+    }
+
+    function mostrarSesiones(sesiones) {
+        const tbody = document.getElementById('sesionesBody');
+        const table = document.getElementById('sesionesTable');
+        const emptyState = document.getElementById('emptyState');
+
+        if (sesiones.length === 0) {
+            emptyState.style.display = 'block';
+            table.style.display = 'none';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        table.style.display = 'table';
+
+        sesiones.forEach(sesion => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td>${sesion.laboratorio}</td>
+            <td>${sesion.pc}</td>
+            <td>${sesion.estudiante}</td>
+            <td>${sesion.id_estudiante}</td>
+            <td>${sesion.hora_entrada}</td>
+            <td>${sesion.tiempo_transcurrido}</td>
+            <td>
+                <button class="btn btn-danger btn-small" onclick="mostrarConfirmacion(${sesion.id}, '${sesion.estudiante}', '${sesion.pc}')">
+                    Finalizar
+                </button>
+            </td>
+        `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function mostrarConfirmacion(visitaId, estudiante, pc) {
+        sesionAFinalizar = visitaId;
+        document.getElementById('confirmMessage').innerHTML = `
+        ¿Finalizar sesión de:<br><br>
+        <strong>Estudiante:</strong> ${estudiante}<br>
+        <strong>PC:</strong> ${pc}
+    `;
+        document.getElementById('confirmModal').classList.add('active');
+    }
+
+    function cerrarModal() {
+        document.getElementById('confirmModal').classList.remove('active');
+        sesionAFinalizar = null;
+        labAFinalizar = null;
+    }
+
+    async function confirmarFinalizacion() {
+        if (!sesionAFinalizar) return;
+
+        try {
+            const response = await fetch('/panel-vespertino/api/finalizar-sesion/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ visita_id: sesionAFinalizar })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.mensaje);
+                cerrarModal();
+                cargarSesiones();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al finalizar la sesión');
+        }
+    }
+
+    async function finalizarTodasLab() {
+        const labFilter = document.getElementById('labFilter').value;
+        if (labFilter === 'all') return;
+
+        const labName = document.getElementById('labFilter').options[document.getElementById('labFilter').selectedIndex].text;
+
+        if (!confirm(`¿Estás seguro de finalizar TODAS las sesiones del ${labName}?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/panel-vespertino/api/finalizar-sesiones-lab/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ laboratorio_id: labFilter })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.mensaje);
+                cargarSesiones();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al finalizar las sesiones');
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

@@ -92,16 +92,7 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'Edificio55',
-#         'USER': 'postgres',
-#         'PASSWORD': 'Damian27052001',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
+
 
 
 
@@ -236,7 +227,9 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_ALL_ORIGINS = True  # Solo para desarrollo, cambiar a False en producción
+# IMPORTANTE: Solo permitir localhost para desarrollo local
+# Cambiar a False en producción y especificar orígenes permitidos arriba
+CORS_ALLOW_ALL_ORIGINS = False  # Cambiado a False por seguridad
 
 CORS_ALLOW_HEADERS = [
     'accept',

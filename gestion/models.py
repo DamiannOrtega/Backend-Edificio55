@@ -76,6 +76,12 @@ class Estudiante(models.Model):
     nombre_completo = models.CharField(max_length=150)
     correo = models.EmailField(unique=True) # EmailField valida que el formato sea de correo
     celular = models.CharField(max_length=15, blank=True, null=True)
+    carrera = models.CharField(
+        max_length=200, 
+        blank=True, 
+        null=True,
+        help_text="Carrera del estudiante"
+    )
 
     def __str__(self):
         return self.nombre_completo
@@ -116,6 +122,31 @@ class SerieReserva(models.Model):
     # Días de la semana - ahora es una relación muchos a muchos
     dias_semana = models.ManyToManyField(DiaSemana, help_text="Selecciona los días de la semana")
     
+    # Color personalizado para diferenciar en el calendario
+    color = models.CharField(
+        max_length=7, 
+        default='#667eea',
+        help_text="Color en formato hexadecimal (ej: #FF5733)"
+    )
+    
+    # Campos estadísticos
+    carrera = models.CharField(
+        max_length=200, 
+        blank=True, 
+        null=True,
+        help_text="Nombre de la carrera (ej: Ingeniería en Sistemas)"
+    )
+    semestre = models.IntegerField(
+        blank=True, 
+        null=True,
+        help_text="Semestre (número entero, ej: 3)"
+    )
+    numero_alumnos = models.IntegerField(
+        blank=True, 
+        null=True,
+        help_text="Número de alumnos en la clase"
+    )
+    
     # Campos de control
     activa = models.BooleanField(default=True, help_text="Si la serie está activa")
     creada_el = models.DateTimeField(auto_now_add=True)
@@ -150,6 +181,33 @@ class ReservaClase(models.Model):
     materia = models.CharField(max_length=100, blank=True, null=True)
     fecha_hora_inicio = models.DateTimeField()
     fecha_hora_fin = models.DateTimeField()
+    
+    # Color personalizado para reservas individuales
+    color = models.CharField(
+        max_length=7, 
+        default='#667eea',
+        blank=True,
+        null=True,
+        help_text="Color en formato hexadecimal (ej: #FF5733). Si está vacío, usa el color de la serie."
+    )
+    
+    # Campos estadísticos
+    carrera = models.CharField(
+        max_length=200, 
+        blank=True, 
+        null=True,
+        help_text="Nombre de la carrera"
+    )
+    semestre = models.IntegerField(
+        blank=True, 
+        null=True,
+        help_text="Semestre (número entero)"
+    )
+    numero_alumnos = models.IntegerField(
+        blank=True, 
+        null=True,
+        help_text="Número de alumnos"
+    )
 
     def __str__(self):
         return f'Reserva de {self.laboratorio.nombre} para {self.materia}'
@@ -236,3 +294,33 @@ class Mantenimiento(models.Model):
                 return f"{minutos}m"
         return "En curso"
     get_duracion.short_description = 'Duración'
+
+
+# Modelo Proxy para Sesiones Activas (para el panel del turno vespertino)
+class SesionActiva(Visita):
+    """
+    Modelo proxy para mostrar solo las visitas activas (sin fecha_hora_fin)
+    en el admin de Django. Útil para el turno vespertino.
+    """
+    class Meta:
+        proxy = True
+        verbose_name = "Sesión Activa"
+        verbose_name_plural = "Sesiones Activas"
+        # Crear permisos personalizados para este proxy
+        default_permissions = ('view', 'delete')
+        permissions = [
+            ('can_view_sesiones_activas', 'Puede ver sesiones activas'),
+            ('can_finalizar_sesiones', 'Puede finalizar sesiones'),
+        ]
+
+
+# Modelo Proxy para acceso directo al Calendario Semanal desde el admin
+class CalendarioSemanal(ReservaClase):
+    """
+    Modelo proxy para crear un acceso directo al calendario semanal
+    en el menú lateral del admin de Django.
+    """
+    class Meta:
+        proxy = True
+        verbose_name = "Calendario Semanal"
+        verbose_name_plural = "Calendario Semanal"
