@@ -1,6 +1,6 @@
 # gestion/forms.py
 from django import forms
-from .models import Laboratorio, PC, Mantenimiento, Estudiante, SerieReserva
+from .models import Laboratorio, PC, Mantenimiento, Estudiante, SerieReserva, Carrera
 from django.utils import timezone
 
 # Lista de carreras de la UAA
@@ -72,11 +72,21 @@ CARRERAS_CHOICES = [
     ('Químico Farmacéutico Biólogo', 'Químico Farmacéutico Biólogo'),
 ]
 
+def get_carreras_choices():
+    """Carga las carreras dinámicamente desde la base de datos"""
+    choices = [('', '-- Selecciona una carrera --')]
+    try:
+        choices += [(c.nombre, c.nombre) for c in Carrera.objects.all()]
+    except Exception:
+        pass  # Si la tabla no existe aún (p.ej. primera migración), usar lista vacía
+    return choices
+
+
 class EstudianteAdminForm(forms.ModelForm):
-    """Formulario personalizado para el admin de Estudiante con dropdown de carreras"""
+    """Formulario personalizado para el admin de Estudiante con dropdown de carreras dinámico"""
     
     carrera = forms.ChoiceField(
-        choices=CARRERAS_CHOICES,
+        choices=get_carreras_choices,  # callable: se evalúa en cada carga del form
         required=False,
         widget=forms.Select(attrs={'class': 'vTextField'}),
         label='Carrera'
@@ -88,10 +98,10 @@ class EstudianteAdminForm(forms.ModelForm):
 
 
 class SerieReservaAdminForm(forms.ModelForm):
-    """Formulario personalizado para el admin de SerieReserva con dropdown de carreras"""
+    """Formulario personalizado para el admin de SerieReserva con dropdown de carreras dinámico"""
     
     carrera = forms.ChoiceField(
-        choices=CARRERAS_CHOICES,
+        choices=get_carreras_choices,  # callable: se evalúa en cada carga del form
         required=False,
         widget=forms.Select(attrs={'class': 'vTextField'}),
         label='Carrera'
@@ -100,6 +110,76 @@ class SerieReservaAdminForm(forms.ModelForm):
     class Meta:
         model = SerieReserva
         fields = '__all__'
+
+
+
+class ReservaClaseAdminForm(forms.ModelForm):
+    """Formulario para ReservaClase con validación de solapamiento de horarios."""
+
+    # Dropdown dinámico de carreras (desde la BD, igual que en Series y Estudiantes)
+    carrera = forms.ChoiceField(
+        choices=get_carreras_choices,  # callable: se evalúa en cada carga
+        required=False,
+        widget=forms.Select(attrs={'class': 'vTextField'}),
+        label='Carrera'
+    )
+    semestre = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'vTextField'}),
+        label='Semestre'
+    )
+    numero_alumnos = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'vTextField'}),
+        label='Número de alumnos'
+    )
+
+    class Meta:
+        from .models import ReservaClase as _ReservaClase
+        model = _ReservaClase
+        fields = '__all__'
+
+    def clean(self):
+        from django.utils import timezone
+        from .models import ReservaClase
+        cleaned_data = super().clean()
+        laboratorio = cleaned_data.get('laboratorio')
+        inicio = cleaned_data.get('fecha_hora_inicio')
+        fin = cleaned_data.get('fecha_hora_fin')
+
+        if not laboratorio or not inicio or not fin:
+            return cleaned_data
+
+        if fin <= inicio:
+            raise forms.ValidationError(
+                "❌ La hora de fin debe ser posterior a la hora de inicio."
+            )
+
+        # Buscar cualquier reserva que se solape en el mismo laboratorio
+        conflictos = ReservaClase.objects.filter(
+            laboratorio=laboratorio,
+            fecha_hora_inicio__lt=fin,
+            fecha_hora_fin__gt=inicio,
+        )
+        # Si estamos editando, excluir la reserva actual
+        if self.instance and self.instance.pk:
+            conflictos = conflictos.exclude(pk=self.instance.pk)
+
+        conflicto = conflictos.select_related('serie').first()
+        if conflicto:
+            inicio_local = timezone.localtime(conflicto.fecha_hora_inicio).strftime('%d/%m/%Y %H:%M')
+            fin_local = timezone.localtime(conflicto.fecha_hora_fin).strftime('%H:%M')
+            tipo = f"Serie: \"{conflicto.serie.nombre}\"" if conflicto.serie else "Reserva individual"
+            profesor = conflicto.profesor or 'Sin profesor'
+            materia = conflicto.materia or 'Sin materia'
+            raise forms.ValidationError(
+                f"❌ CONFLICTO DE HORARIO: El laboratorio '{laboratorio}' ya está ocupado "
+                f"de {inicio_local} a {fin_local} por el profesor '{profesor}' "
+                f"(materia: '{materia}') — {tipo}. "
+                f"No se puede registrar esta reserva en ese horario."
+            )
+
+        return cleaned_data
 
 
 

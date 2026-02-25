@@ -13,6 +13,18 @@ class Laboratorio(models.Model):
     def __str__(self):
         return self.nombre
 
+# Modelo para las Carreras (dinámicas, gestionadas desde el admin)
+class Carrera(models.Model):
+    nombre = models.CharField(max_length=200, unique=True)
+
+    class Meta:
+        verbose_name = "Carrera"
+        verbose_name_plural = "Carreras"
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+
 # Modelo para la tabla Software
 class Software(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -207,6 +219,13 @@ class ReservaClase(models.Model):
         blank=True, 
         null=True,
         help_text="Número de alumnos"
+    )
+    
+    # Nota para reservas individuales (aparece directamente en el calendario)
+    nota = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Nota visible en el calendario (ej: Examen, Curso, Evento). Solo para reservas individuales."
     )
 
     def __str__(self):

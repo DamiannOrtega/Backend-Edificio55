@@ -166,7 +166,7 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Bienvenido al panel de administración del Sistema de Laboratorios del Edificio 55",
 
     # Copyright en el footer
-    "copyright": "Universidad Autónoma de Aguascalientes",
+    "copyright": "Universidad Autónoma de Aguascalientes · Desarrollado por Juan Damián Ortega De Luna y Alicia Jazmín Díaz Laguna",
 
     "custom_css": "css/admin_fix.css",
     
@@ -183,9 +183,14 @@ JAZZMIN_SETTINGS = {
         "gestion.Laboratorio": "fas fa-building",
         "gestion.PC": "fas fa-desktop",
         "gestion.ReservaClase": "fas fa-calendar-alt",
+        "gestion.SerieReserva": "fas fa-calendar-week",
+        "gestion.DiaSemana": "fas fa-clock",
+        "gestion.Carrera": "fas fa-graduation-cap",
+        "gestion.CalendarioSemanal": "fas fa-calendar",
         "gestion.Software": "fas fa-compact-disc",
         "gestion.Visita": "fas fa-history",
         "gestion.Mantenimiento": "fas fa-tools",
+        "gestion.SesionActiva": "fas fa-door-open",
     },
 
     # Opciones de la UI

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 # ASÍ DEBE QUEDAR
-from .models import Laboratorio, Software, PC, Estudiante, Visita, ReservaClase, SerieReserva
+from .models import Laboratorio, Software, PC, Estudiante, Visita, ReservaClase, SerieReserva, Carrera
 from django.utils import timezone
 from django.db.models import Count, Q
 from datetime import timedelta
@@ -216,6 +216,32 @@ def opciones_dinamicas(request):
         'software': software_disponible,
         'pcs': pcs_disponibles,
     })
+
+
+@csrf_exempt
+def api_carreras(request):
+    """API para listar y crear carreras dinámicamente."""
+    if request.method == 'GET':
+        carreras = list(Carrera.objects.values_list('nombre', flat=True))
+        return JsonResponse({'carreras': carreras})
+    
+    elif request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            nombre = data.get('nombre', '').strip()
+            if not nombre:
+                return JsonResponse({'error': 'El nombre de la carrera es requerido.'}, status=400)
+            carrera, created = Carrera.objects.get_or_create(nombre=nombre)
+            if created:
+                return JsonResponse({'nombre': carrera.nombre, 'creada': True}, status=201)
+            else:
+                return JsonResponse({'nombre': carrera.nombre, 'creada': False}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
 
 def finalizar_visita(request):
     contexto = {}

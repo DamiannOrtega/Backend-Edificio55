@@ -11,7 +11,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
-# --- Clases de Administración existentes ---
+# --- Clases de AdministraciÃ³n existentes ---
 
 class SoftwareInline(admin.TabularInline):
     model = Software.laboratorios.through
@@ -20,19 +20,19 @@ class SoftwareInline(admin.TabularInline):
     extra = 1
 
 class SoftwareAdmin(admin.ModelAdmin):
-    # 1. Ordena la lista alfabéticamente por nombre
+    # 1. Ordena la lista alfabÃ©ticamente por nombre
     ordering = ('nombre',)
 
-    # 2. Añade un filtro por laboratorios
+    # 2. AÃ±ade un filtro por laboratorios
     list_filter = ('laboratorios',)
 
     # 3. Mejora las columnas que se muestran en la lista
     list_display = ('nombre', 'version', 'get_laboratorios')
 
-    # Opcional: añade una barra de búsqueda
+    # Opcional: aÃ±ade una barra de bÃºsqueda
     search_fields = ('nombre',)
 
-    # Esta función crea el texto para la columna "Laboratorios"
+    # Esta funciÃ³n crea el texto para la columna "Laboratorios"
     def get_laboratorios(self, obj):
         # Une los nombres de todos los laboratorios asociados con una coma
         return ", ".join([lab.nombre for lab in obj.laboratorios.all()])
@@ -43,7 +43,7 @@ class PCInline(admin.TabularInline):
     extra = 1
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """Ordenar laboratorios alfabéticamente"""
+        """Ordenar laboratorios alfabÃ©ticamente"""
         if db_field.name == "laboratorio":
             kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -55,48 +55,48 @@ class PCAdmin(admin.ModelAdmin):
     # Panel de filtro a la derecha
     list_filter = ('laboratorio', 'estado')
 
-    # Orden por defecto: primero por laboratorio, luego por número de PC
+    # Orden por defecto: primero por laboratorio, luego por nÃºmero de PC
     ordering = ('laboratorio', 'numero_pc')
 
-    # Barra de búsqueda
+    # Barra de bÃºsqueda
     search_fields = ('laboratorio__nombre', 'numero_pc')
     
     # Acciones personalizadas
     actions = ['actualizar_estados_segun_reservas']
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """Ordenar laboratorios alfabéticamente"""
+        """Ordenar laboratorios alfabÃ©ticamente"""
         if db_field.name == "laboratorio":
             kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def get_disponibilidad(self, obj):
-        """Muestra si la PC está disponible para uso individual"""
+        """Muestra si la PC estÃ¡ disponible para uso individual"""
         if obj.esta_disponible_para_uso():
-            return "✅ Disponible para uso individual"
+            return "âœ… Disponible para uso individual"
         else:
-            return "❌ No disponible para uso individual"
+            return "âŒ No disponible para uso individual"
     get_disponibilidad.short_description = 'Disponibilidad'
     
     def actualizar_estados_segun_reservas(self, request, queryset):
-        """Acción para actualizar estados de PCs según reservas activas"""
+        """AcciÃ³n para actualizar estados de PCs segÃºn reservas activas"""
         from django.core.management import call_command
         call_command('actualizar_estados_pcs')
-        self.message_user(request, "✅ Estados de PCs actualizados según reservas activas")
-    actualizar_estados_segun_reservas.short_description = "Actualizar estados según reservas activas"
+        self.message_user(request, "âœ… Estados de PCs actualizados segÃºn reservas activas")
+    actualizar_estados_segun_reservas.short_description = "Actualizar estados segÃºn reservas activas"
     
     def save_model(self, request, obj, form, change):
-        """Sobrescribe el método save para crear mantenimiento automáticamente"""
+        """Sobrescribe el mÃ©todo save para crear mantenimiento automÃ¡ticamente"""
         from django.utils import timezone
         
-        # Si es una edición (change=True), verificar si el estado cambió a Mantenimiento
+        # Si es una ediciÃ³n (change=True), verificar si el estado cambiÃ³ a Mantenimiento
         if change:
             # Obtener el objeto original de la base de datos
             original_obj = PC.objects.get(pk=obj.pk)
             estado_anterior = original_obj.estado
             estado_nuevo = obj.estado
             
-            # Si el estado cambió a Mantenimiento, crear un registro de mantenimiento
+            # Si el estado cambiÃ³ a Mantenimiento, crear un registro de mantenimiento
             if estado_anterior != 'Mantenimiento' and estado_nuevo == 'Mantenimiento':
                 # Verificar si ya existe un mantenimiento activo para esta PC
                 mantenimiento_activo = Mantenimiento.objects.filter(
@@ -107,33 +107,33 @@ class PCAdmin(admin.ModelAdmin):
                 if not mantenimiento_activo:
                     Mantenimiento.objects.create(
                         pc=obj,
-                        descripcion='',  # Vacío porque se cambió desde PC
+                        descripcion='',  # VacÃ­o porque se cambiÃ³ desde PC
                         fecha_inicio=timezone.now()
                     )
-                    self.message_user(request, f"✅ Se creó automáticamente un registro de mantenimiento para {obj}", messages.SUCCESS)
+                    self.message_user(request, f"âœ… Se creÃ³ automÃ¡ticamente un registro de mantenimiento para {obj}", messages.SUCCESS)
         
         # Guardar el objeto
         super().save_model(request, obj, form, change)
 
 class LaboratorioAdmin(admin.ModelAdmin):
-    # 1. Añade el inline para PCs
+    # 1. AÃ±ade el inline para PCs
     inlines = [PCInline, SoftwareInline]
 
     # 2. Mejora las columnas que se muestran en la lista
     list_display = ('nombre', 'get_pc_count', 'get_software_count')
 
-    # 3. Añade una barra de búsqueda
+    # 3. AÃ±ade una barra de bÃºsqueda
     search_fields = ('nombre', 'descripcion')
 
-    # 4. Añade un filtro por descripción (si no está vacía)
+    # 4. AÃ±ade un filtro por descripciÃ³n (si no estÃ¡ vacÃ­a)
     list_filter = ('descripcion',)
 
-    # Esta función cuenta las PCs en cada laboratorio
+    # Esta funciÃ³n cuenta las PCs en cada laboratorio
     def get_pc_count(self, obj):
         return obj.pc_set.count()
-    get_pc_count.short_description = 'Número de PCs'
+    get_pc_count.short_description = 'NÃºmero de PCs'
 
-    # Esta función cuenta el software instalado en cada laboratorio
+    # Esta funciÃ³n cuenta el software instalado en cada laboratorio
     def get_software_count(self, obj):
         return obj.software_instalado.count()
     get_software_count.short_description = 'Software Instalado'
@@ -152,10 +152,10 @@ class VisitaAdmin(admin.ModelAdmin):
             minutos = int((duracion.total_seconds() % 3600) // 60)
             return f"{horas}h {minutos}m"
         return "En curso"
-    get_duracion.short_description = 'Duración'
+    get_duracion.short_description = 'DuraciÃ³n'
 
 class EstudianteAdmin(admin.ModelAdmin):
-    """Administración mejorada para Visitantes (Estudiantes)"""
+    """AdministraciÃ³n mejorada para Visitantes (Estudiantes)"""
     form = EstudianteAdminForm  # Usar formulario personalizado con dropdown de carreras
     
     list_display = (
@@ -196,7 +196,7 @@ class EstudianteAdmin(admin.ModelAdmin):
     get_total_visitas.short_description = 'Total Visitas'
     
     def get_software_mas_usado(self, obj):
-        """Retorna el software más utilizado por el estudiante"""
+        """Retorna el software mÃ¡s utilizado por el estudiante"""
         from django.db.models import Count
         
         software_stats = obj.visita_set.values('software_utilizado__nombre').annotate(
@@ -211,14 +211,14 @@ class EstudianteAdmin(admin.ModelAdmin):
                 nombre, count
             )
         return format_html('<span style="color: #999;">N/A</span>')
-    get_software_mas_usado.short_description = 'Software Más Usado'
+    get_software_mas_usado.short_description = 'Software MÃ¡s Usado'
     
     def get_ultima_visita(self, obj):
-        """Retorna la fecha de la última visita del estudiante"""
+        """Retorna la fecha de la Ãºltima visita del estudiante"""
         ultima_visita = obj.visita_set.order_by('-fecha_hora_inicio').first()
         if ultima_visita:
             fecha = ultima_visita.fecha_hora_inicio
-            # Calcular hace cuánto tiempo
+            # Calcular hace cuÃ¡nto tiempo
             from django.utils import timezone
             ahora = timezone.now()
             diferencia = ahora - fecha
@@ -228,7 +228,7 @@ class EstudianteAdmin(admin.ModelAdmin):
             elif diferencia.days == 1:
                 tiempo_texto = "Ayer"
             elif diferencia.days < 7:
-                tiempo_texto = f"Hace {diferencia.days} días"
+                tiempo_texto = f"Hace {diferencia.days} dÃ­as"
             elif diferencia.days < 30:
                 semanas = diferencia.days // 7
                 tiempo_texto = f"Hace {semanas} semana{'s' if semanas > 1 else ''}"
@@ -246,34 +246,26 @@ class EstudianteAdmin(admin.ModelAdmin):
     get_ultima_visita.admin_order_field = '-visita__fecha_hora_inicio'
 
 class MantenimientoAdmin(admin.ModelAdmin):
-    """Administración de mantenimientos de PCs"""
+    """AdministraciÃ³n de mantenimientos de PCs"""
     form = MantenimientoForm
     list_display = ('pc', 'get_laboratorio', 'descripcion', 'fecha_inicio', 'fecha_fin', 'get_estado', 'get_duracion', 'acciones')
     list_filter = ('fecha_inicio', 'pc__laboratorio', 'fecha_fin')
     search_fields = ('pc__laboratorio__nombre', 'pc__numero_pc', 'descripcion')
     date_hierarchy = 'fecha_inicio'
-    ordering = ('-fecha_inicio',)  # usado solo por el system check; get_ordering() aplica el orden real
-
-    def get_ordering(self, request):
-        """Activos (fecha_fin=NULL) primero usando NULLS FIRST de PostgreSQL, luego más recientes."""
-        from django.db.models import F
-        return [F('fecha_fin').asc(nulls_first=True), '-fecha_inicio']
-
-
-
-    class Media:
-        js = ('js/mantenimiento_form.js',)
-
+    ordering = ('-fecha_inicio',)
+    
     fieldsets = (
-        ('Información del Mantenimiento', {
+        ('InformaciÃ³n del Mantenimiento', {
             'fields': ('laboratorio', 'pc', 'descripcion', 'fecha_inicio', 'fecha_fin'),
             'description': 'Seleccione primero el laboratorio para filtrar las PCs disponibles'
         }),
     )
-
+    
     readonly_fields = ()
-
-
+    
+    class Media:
+        js = ('js/mantenimiento_form.js',)
+    
     def get_laboratorio(self, obj):
         """Retorna el laboratorio al que pertenece la PC"""
         return obj.pc.laboratorio.nombre
@@ -282,17 +274,17 @@ class MantenimientoAdmin(admin.ModelAdmin):
     def get_estado(self, obj):
         """Retorna el estado del mantenimiento con formato visual"""
         if obj.fecha_fin:
-            return format_html('<span style="color: green; font-weight: bold;">✓ Terminado</span>')
-        return format_html('<span style="color: orange; font-weight: bold;">● Activo</span>')
+            return format_html('<span style="color: green; font-weight: bold;">âœ“ Terminado</span>')
+        return format_html('<span style="color: orange; font-weight: bold;">â— Activo</span>')
     get_estado.short_description = 'Estado'
     
     def get_duracion(self, obj):
-        """Retorna la duración del mantenimiento"""
+        """Retorna la duraciÃ³n del mantenimiento"""
         return obj.get_duracion()
-    get_duracion.short_description = 'Duración'
+    get_duracion.short_description = 'DuraciÃ³n'
     
     def acciones(self, obj):
-        """Botones de acción para cada mantenimiento"""
+        """Botones de acciÃ³n para cada mantenimiento"""
         if not obj.fecha_fin:
             finalizar_url = reverse('admin:finalizar_mantenimiento', args=[obj.pk])
             return format_html(
@@ -340,7 +332,7 @@ class MantenimientoAdmin(admin.ModelAdmin):
             mantenimiento = Mantenimiento.objects.get(id=mantenimiento_id)
             
             if mantenimiento.fecha_fin:
-                messages.warning(request, 'Este mantenimiento ya está finalizado')
+                messages.warning(request, 'Este mantenimiento ya estÃ¡ finalizado')
             else:
                 mantenimiento.fecha_fin = timezone.now()
                 mantenimiento.save()
@@ -350,7 +342,7 @@ class MantenimientoAdmin(admin.ModelAdmin):
                     mantenimiento.pc.estado = 'Disponible'
                     mantenimiento.pc.save()
                 
-                messages.success(request, f'✅ Mantenimiento de {mantenimiento.pc} finalizado correctamente')
+                messages.success(request, f'âœ… Mantenimiento de {mantenimiento.pc} finalizado correctamente')
             
             return redirect('admin:gestion_mantenimiento_changelist')
         except Mantenimiento.DoesNotExist:
@@ -370,10 +362,10 @@ class MantenimientoAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
     def save_model(self, request, obj, form, change):
-        """Sobrescribe el método save para:
+        """Sobrescribe el mÃ©todo save para:
         - Manejar el campo laboratorio (solo filtrado, no se guarda)
         - Asegurar que la PC cambie a estado 'Mantenimiento' cuando haya un mantenimiento activo
-        - Opcionalmente devolver la PC a 'Disponible' si el mantenimiento se marca como finalizado aquí
+        - Opcionalmente devolver la PC a 'Disponible' si el mantenimiento se marca como finalizado aquÃ­
         """
         from django.utils import timezone
 
@@ -386,7 +378,7 @@ class MantenimientoAdmin(admin.ModelAdmin):
             except Mantenimiento.DoesNotExist:
                 pass
 
-        # Establecer fecha_inicio por defecto si no está establecida
+        # Establecer fecha_inicio por defecto si no estÃ¡ establecida
         if not obj.fecha_inicio:
             obj.fecha_inicio = timezone.now()
 
@@ -395,13 +387,13 @@ class MantenimientoAdmin(admin.ModelAdmin):
         # Si el mantenimiento NO tiene fecha_fin, considerarlo activo
         if obj.pc:
             if obj.fecha_fin is None:
-                # Asegurar que la PC esté en estado 'Mantenimiento'
+                # Asegurar que la PC estÃ© en estado 'Mantenimiento'
                 if obj.pc.estado != "Mantenimiento":
                     obj.pc.estado = "Mantenimiento"
                     obj.pc.save()
             else:
-                # Si antes no tenía fecha_fin (activo) y ahora sí, podemos devolver la PC a 'Disponible'
-                # (esto cubre el caso de que el admin edite manualmente sin usar el botón de finalizar)
+                # Si antes no tenÃ­a fecha_fin (activo) y ahora sÃ­, podemos devolver la PC a 'Disponible'
+                # (esto cubre el caso de que el admin edite manualmente sin usar el botÃ³n de finalizar)
                 if original_fecha_fin is None and obj.pc.estado == "Mantenimiento":
                     obj.pc.estado = "Disponible"
                     obj.pc.save()
@@ -412,14 +404,14 @@ class MantenimientoAdmin(admin.ModelAdmin):
         return qs.select_related('pc', 'pc__laboratorio')
 
 class CarreraAdmin(admin.ModelAdmin):
-    """Administración de carreras (lista dinámica de carreras)"""
+    """AdministraciÃ³n de carreras (lista dinÃ¡mica de carreras)"""
     list_display = ('nombre',)
     search_fields = ('nombre',)
     ordering = ('nombre',)
 
 
 class ReservaClaseAdmin(admin.ModelAdmin):
-    form = ReservaClaseAdminForm  # Incluye validación de solapamiento de horarios
+    form = ReservaClaseAdminForm  # Incluye validaciÃ³n de solapamiento de horarios
     list_display = ('laboratorio', 'profesor', 'materia', 'fecha_hora_inicio', 'fecha_hora_fin', 'serie')
     list_filter = (
         'laboratorio', 
@@ -448,7 +440,7 @@ class ReservaClaseAdmin(admin.ModelAdmin):
         return qs.select_related('laboratorio', 'serie')
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """Ordenar laboratorios alfabéticamente"""
+        """Ordenar laboratorios alfabÃ©ticamente"""
         if db_field.name == "laboratorio":
             kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -535,7 +527,7 @@ class ReservaClaseAdmin(admin.ModelAdmin):
         
         # Build days structure
         days = []
-        day_names = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
+        day_names = ['Lunes', 'Martes', 'MiÃ©rcoles', 'Jueves', 'Viernes']
         
         for i in range(5):  # Monday to Friday
             day_date = week_start + timedelta(days=i)
@@ -577,7 +569,7 @@ class ReservaClaseAdmin(admin.ModelAdmin):
             'selected_lab': selected_lab,
             'today_str': today_str,
             'custom_date': custom_date or today_str,
-            'site_header': 'Administración de Edificio 55',
+            'site_header': 'AdministraciÃ³n de Edificio 55',
             'site_title': 'Edificio 55',
         }
         
@@ -605,15 +597,15 @@ class SerieReservaAdmin(admin.ModelAdmin):
     inlines = [ReservaClaseInline]
     
     fieldsets = (
-        ('Información General', {
+        ('InformaciÃ³n General', {
             'fields': ('nombre', 'laboratorio', 'profesor', 'materia', 'color', 'carrera', 'semestre', 'numero_alumnos')
         }),
         ('Horarios y Fechas', {
             'fields': ('fecha_inicio', 'fecha_fin', 'hora_inicio', 'hora_fin')
         }),
-        ('Días de la Semana', {
+        ('DÃ­as de la Semana', {
             'fields': ('dias_semana',),
-            'description': 'Selecciona los días de la semana (puedes elegir múltiples días)'
+            'description': 'Selecciona los dÃ­as de la semana (puedes elegir mÃºltiples dÃ­as)'
         }),
         ('Estado', {
             'fields': ('activa',)
@@ -621,7 +613,7 @@ class SerieReservaAdmin(admin.ModelAdmin):
     )
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """Ordenar laboratorios alfabéticamente"""
+        """Ordenar laboratorios alfabÃ©ticamente"""
         if db_field.name == "laboratorio":
             kwargs["queryset"] = Laboratorio.objects.all().order_by('nombre')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -633,9 +625,9 @@ class SerieReservaAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, request, **kwargs)
     
     def formfield_for_manytomany(self, db_field, request, **kwargs):
-        """Personaliza el queryset para ordenar los días de la semana correctamente"""
+        """Personaliza el queryset para ordenar los dÃ­as de la semana correctamente"""
         if db_field.name == 'dias_semana':
-            # Mapeo de orden: Domingo=0, Lunes=1, Martes=2, Miércoles=3, Jueves=4, Viernes=5, Sábado=6
+            # Mapeo de orden: Domingo=0, Lunes=1, Martes=2, MiÃ©rcoles=3, Jueves=4, Viernes=5, SÃ¡bado=6
             from .models import DiaSemana
             from django.db.models import Case, When, IntegerField
             
@@ -651,7 +643,7 @@ class SerieReservaAdmin(admin.ModelAdmin):
     
     def get_dias_display(self, obj):
         return obj.get_dias_display()
-    get_dias_display.short_description = 'Días'
+    get_dias_display.short_description = 'DÃ­as'
     
     def get_horario(self, obj):
         return f"{obj.hora_inicio.strftime('%H:%M')} - {obj.hora_fin.strftime('%H:%M')}"
@@ -662,20 +654,20 @@ class SerieReservaAdmin(admin.ModelAdmin):
     get_ocurrencias_count.short_description = 'Reservas Programadas'
     
     def regenerar_reservas(self, request, queryset):
-        """Acción para regenerar las reservas de las series seleccionadas"""
+        """AcciÃ³n para regenerar las reservas de las series seleccionadas"""
         total_reservas_creadas = 0
         for serie in queryset:
             if serie.activa and serie.dias_semana.exists():
                 self.crear_reservas_recurrentes(serie)
                 total_reservas_creadas += serie.ocurrencias.count()
         else:
-                self.message_user(request, f"⚠️ La serie '{serie.nombre}' está inactiva o no tiene días seleccionados.", level='WARNING')
+                self.message_user(request, f"âš ï¸ La serie '{serie.nombre}' estÃ¡ inactiva o no tiene dÃ­as seleccionados.", level='WARNING')
         
-        self.message_user(request, f"✅ Se regeneraron las reservas para {queryset.count()} serie(s). Total de reservas: {total_reservas_creadas}")
+        self.message_user(request, f"âœ… Se regeneraron las reservas para {queryset.count()} serie(s). Total de reservas: {total_reservas_creadas}")
     regenerar_reservas.short_description = "Regenerar reservas para las series seleccionadas"
     
     def eliminar_reservas_existentes(self, request, queryset):
-        """Acción para eliminar todas las reservas existentes de las series seleccionadas"""
+        """AcciÃ³n para eliminar todas las reservas existentes de las series seleccionadas"""
         total_eliminadas = 0
         for serie in queryset:
             eliminadas = serie.ocurrencias.count()
@@ -686,25 +678,25 @@ class SerieReservaAdmin(admin.ModelAdmin):
     eliminar_reservas_existentes.short_description = "Eliminar reservas existentes de las series seleccionadas"
     
     def actualizar_colores_reservas(self, request, queryset):
-        """Acción para actualizar los colores de las reservas existentes con el color de su serie"""
+        """AcciÃ³n para actualizar los colores de las reservas existentes con el color de su serie"""
         total_actualizadas = 0
         for serie in queryset:
             # Actualizar todas las reservas de esta serie con el color de la serie
             actualizadas = serie.ocurrencias.update(color=serie.color)
             total_actualizadas += actualizadas
         
-        self.message_user(request, f"✅ Se actualizaron {total_actualizadas} reservas con los colores de {queryset.count()} serie(s).")
+        self.message_user(request, f"âœ… Se actualizaron {total_actualizadas} reservas con los colores de {queryset.count()} serie(s).")
     actualizar_colores_reservas.short_description = "Actualizar colores de reservas con el color de la serie"
     
     def save_model(self, request, obj, form, change):
-        """Sobrescribe el método save para crear automáticamente las reservas recurrentes"""
+        """Sobrescribe el mÃ©todo save para crear automÃ¡ticamente las reservas recurrentes"""
         super().save_model(request, obj, form, change)
         
     def save_related(self, request, form, formsets, change):
-        """Sobrescribe el método save_related para crear reservas después de guardar las relaciones"""
+        """Sobrescribe el mÃ©todo save_related para crear reservas despuÃ©s de guardar las relaciones"""
         super().save_related(request, form, formsets, change)
         
-        # Crear reservas después de que se hayan guardado los días de la semana
+        # Crear reservas despuÃ©s de que se hayan guardado los dÃ­as de la semana
         obj = form.instance
         if obj.activa and obj.dias_semana.exists():
             conflictos = self.crear_reservas_recurrentes(obj)
@@ -720,12 +712,12 @@ class SerieReservaAdmin(admin.ModelAdmin):
         from datetime import datetime, timedelta, date, time
         from django.utils import timezone
         
-        # Mapeo de días de la semana
+        # Mapeo de dÃ­as de la semana
         dias_map = {
             'L': 0, 'M': 1, 'X': 2, 'J': 3, 'V': 4, 'S': 5, 'D': 6
         }
         
-        # Obtener los días de la semana como números
+        # Obtener los dÃ­as de la semana como nÃºmeros
         dias_codigos = serie.get_dias_codigos()
         dias_numeros = [dias_map[d] for d in dias_codigos]
         
@@ -737,9 +729,9 @@ class SerieReservaAdmin(admin.ModelAdmin):
         # Fecha actual
         fecha_actual = serie.fecha_inicio
         
-        # Crear reservas para cada día en el rango de fechas
+        # Crear reservas para cada dÃ­a en el rango de fechas
         while fecha_actual <= serie.fecha_fin:
-            # Si el día de la semana está en la lista de días de la serie
+            # Si el dÃ­a de la semana estÃ¡ en la lista de dÃ­as de la serie
             if fecha_actual.weekday() in dias_numeros:
                 # Crear datetime combinando fecha y hora
                 fecha_hora_inicio = timezone.make_aware(
@@ -766,8 +758,8 @@ class SerieReservaAdmin(admin.ModelAdmin):
                     profesor = conflicto_existente.profesor or 'Sin profesor'
                     materia = conflicto_existente.materia or 'Sin materia'
                     conflictos.append(
-                        f"⚠️ {fecha_actual.strftime('%d/%m/%Y')}  — Lab '{serie.laboratorio}' ocupado de "
-                        f"{inicio_local[-5:]} a {fin_local} por '{profesor}' ('{materia}')  — {tipo}. "
+                        f"âš ï¸ {fecha_actual.strftime('%d/%m/%Y')} â€” Lab '{serie.laboratorio}' ocupado de "
+                        f"{inicio_local[-5:]} a {fin_local} por '{profesor}' ('{materia}') â€” {tipo}. "
                         f"Esta ocurrencia NO fue creada."
                     )
                     fecha_actual += timedelta(days=1)
@@ -799,13 +791,13 @@ class SerieReservaAdmin(admin.ModelAdmin):
                 else:
                     reservas_existentes += 1
             
-            # Avanzar al siguiente día
+            # Avanzar al siguiente dÃ­a
             fecha_actual += timedelta(days=1)
         
         if reservas_creadas > 0:
-            print(f"✅ Se crearon {reservas_creadas} nuevas reservas para la serie '{serie.nombre}'")
+            print(f"âœ… Se crearon {reservas_creadas} nuevas reservas para la serie '{serie.nombre}'")
         if conflictos:
-            print(f"⚠️ {len(conflictos)} conflictos encontrados al generar serie '{serie.nombre}'")
+            print(f"âš ï¸ {len(conflictos)} conflictos encontrados al generar serie '{serie.nombre}'")
         
         return conflictos
 
@@ -813,7 +805,7 @@ class DiaSemanaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'codigo')
     
     def get_queryset(self, request):
-        """Ordena los días de la semana: Domingo, Lunes, Martes, etc."""
+        """Ordena los dÃ­as de la semana: Domingo, Lunes, Martes, etc."""
         from django.db.models import Case, When, IntegerField
         orden_dias = {'D': 0, 'L': 1, 'M': 2, 'X': 3, 'J': 4, 'V': 5, 'S': 6}
         when_conditions = [When(codigo=codigo, then=orden) for codigo, orden in orden_dias.items()]
@@ -838,7 +830,7 @@ admin.site.register(Mantenimiento, MantenimientoAdmin)
 class SesionActivaAdmin(admin.ModelAdmin):
     """
     Admin para mostrar solo las sesiones activas (sin fecha_hora_fin).
-    Diseñado para el turno vespertino.
+    DiseÃ±ado para el turno vespertino.
     """
     list_display = ('get_estudiante', 'get_id_estudiante', 'get_pc', 'get_laboratorio', 'software_utilizado', 'fecha_hora_inicio', 'get_tiempo_transcurrido', 'acciones')
     list_filter = ('pc__laboratorio', 'fecha_hora_inicio')
@@ -847,7 +839,7 @@ class SesionActivaAdmin(admin.ModelAdmin):
     
     # Sobrescribir permisos para usar los de 'visita' en lugar de 'sesionactiva'
     def has_module_permission(self, request):
-        """Permite ver el módulo si tiene permisos de visita"""
+        """Permite ver el mÃ³dulo si tiene permisos de visita"""
         return request.user.has_perm('gestion.view_visita')
     
     def has_view_permission(self, request, obj=None):
@@ -855,7 +847,7 @@ class SesionActivaAdmin(admin.ModelAdmin):
         return request.user.has_perm('gestion.view_visita')
     
     def has_add_permission(self, request):
-        """No permitir agregar sesiones desde aquí"""
+        """No permitir agregar sesiones desde aquÃ­"""
         return False
     
     def has_change_permission(self, request, obj=None):
@@ -898,16 +890,16 @@ class SesionActivaAdmin(admin.ModelAdmin):
     get_tiempo_transcurrido.short_description = 'Tiempo Transcurrido'
     
     def acciones(self, obj):
-        """Botón para finalizar sesión"""
+        """BotÃ³n para finalizar sesiÃ³n"""
         finalizar_url = reverse('admin:finalizar_sesion', args=[obj.pk])
         return format_html(
-            '<a class="button" href="{}" style="background-color: #dc3545; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Finalizar Sesión</a>',
+            '<a class="button" href="{}" style="background-color: #dc3545; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px;">Finalizar SesiÃ³n</a>',
             finalizar_url
         )
     acciones.short_description = 'Acciones'
     
     def get_urls(self):
-        """Agregar URL personalizada para finalizar sesión"""
+        """Agregar URL personalizada para finalizar sesiÃ³n"""
         urls = super().get_urls()
         custom_urls = [
             path('finalizar-sesion/<int:sesion_id>/', self.admin_site.admin_view(self.finalizar_sesion_view), name='finalizar_sesion'),
@@ -915,13 +907,13 @@ class SesionActivaAdmin(admin.ModelAdmin):
         return custom_urls + urls
     
     def finalizar_sesion_view(self, request, sesion_id):
-        """Vista para finalizar una sesión activa"""
+        """Vista para finalizar una sesiÃ³n activa"""
         from django.utils import timezone
         
         try:
             sesion = Visita.objects.get(id=sesion_id, fecha_hora_fin__isnull=True)
             
-            # Finalizar la sesión
+            # Finalizar la sesiÃ³n
             sesion.fecha_hora_fin = timezone.now()
             sesion.save()
             
@@ -930,10 +922,10 @@ class SesionActivaAdmin(admin.ModelAdmin):
                 sesion.pc.estado = 'Disponible'
                 sesion.pc.save()
             
-            messages.success(request, f'✅ Sesión de {sesion.estudiante.nombre_completo} en {sesion.pc} finalizada correctamente')
+            messages.success(request, f'âœ… SesiÃ³n de {sesion.estudiante.nombre_completo} en {sesion.pc} finalizada correctamente')
             
         except Visita.DoesNotExist:
-            messages.error(request, 'Sesión no encontrada o ya finalizada')
+            messages.error(request, 'SesiÃ³n no encontrada o ya finalizada')
         
         return redirect('admin:gestion_sesionactiva_changelist')
 
@@ -942,7 +934,7 @@ class SesionActivaAdmin(admin.ModelAdmin):
 class CalendarioSemanalAdmin(admin.ModelAdmin):
     """
     Admin que redirige directamente al calendario semanal.
-    Aparece como una sección independiente en el menú lateral.
+    Aparece como una secciÃ³n independiente en el menÃº lateral.
     """
     
     class Media:
@@ -951,7 +943,7 @@ class CalendarioSemanalAdmin(admin.ModelAdmin):
         }
     
     def has_module_permission(self, request):
-        """Mostrar en el menú si tiene permisos para ver reservas"""
+        """Mostrar en el menÃº si tiene permisos para ver reservas"""
         return request.user.has_perm('gestion.view_reservaclase')
     
     def changelist_view(self, request, extra_context=None):
