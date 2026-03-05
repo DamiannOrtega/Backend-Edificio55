@@ -5,11 +5,29 @@ from datetime import datetime, timedelta
 # Modelo para la tabla Laboratorios
 class Laboratorio(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
-    descripcion = models.TextField(blank=True, null=True) # blank=True y null=True hacen que no sea obligatorio
+    descripcion = models.TextField(blank=True, null=True)
     
     class Meta:
-        ordering = ['nombre']  # Ordenar alfabéticamente por nombre
+        ordering = ['nombre']
     
+    def __str__(self):
+        return self.nombre
+
+
+class TipoEvento(models.Model):
+    """Tipo de evento gestionable desde el admin (Clase, Examen, Conferencia, etc.)"""
+    nombre = models.CharField(max_length=50, unique=True)
+    color  = models.CharField(
+        max_length=7,
+        default='#667eea',
+        help_text="Color del badge en formato hex (ej: #FF5733)"
+    )
+
+    class Meta:
+        verbose_name = "Tipo de Evento"
+        verbose_name_plural = "Tipos de Evento"
+        ordering = ['nombre']
+
     def __str__(self):
         return self.nombre
 
@@ -123,6 +141,16 @@ class SerieReserva(models.Model):
     profesor = models.CharField(max_length=100, blank=True)
     materia = models.CharField(max_length=100, blank=True)
     
+    # Tipo de evento (ForeignKey al modelo TipoEvento gestionable)
+    tipo_evento = models.ForeignKey(
+        'TipoEvento',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='series',
+        help_text="Tipo de evento de la serie (Clase, Examen, Conferencia…)"
+    )
+
     # Fechas de inicio y fin de la serie
     fecha_inicio = models.DateField(default=timezone.now, help_text="Fecha de inicio de la serie de reservas")
     fecha_fin = models.DateField(default=timezone.now, help_text="Fecha de fin de la serie de reservas")
@@ -221,7 +249,17 @@ class ReservaClase(models.Model):
         help_text="Número de alumnos"
     )
     
-    # Nota para reservas individuales (aparece directamente en el calendario)
+    # Tipo de evento (ForeignKey gestionable desde el admin)
+    tipo_evento = models.ForeignKey(
+        'TipoEvento',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reservas',
+        help_text="Tipo de evento que ocupa el laboratorio"
+    )
+
+    # Nota para reservas individuales
     nota = models.TextField(
         blank=True,
         null=True,

@@ -1,5 +1,5 @@
 ﻿from django.contrib import admin
-from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana, Mantenimiento, SesionActiva, CalendarioSemanal, Carrera
+from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana, Mantenimiento, SesionActiva, CalendarioSemanal, Carrera, TipoEvento
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from .forms import RecurrenciaForm, MantenimientoForm, EstudianteAdminForm, SerieReservaAdminForm, ReservaClaseAdminForm
@@ -418,30 +418,81 @@ class CarreraAdmin(admin.ModelAdmin):
     ordering = ('nombre',)
 
 
+class FechaExactaFilter(admin.SimpleListFilter):
+    """Filtra reservas por fecha exacta (param: fecha_exacta en la URL).
+    El date-picker se renderiza en change_list.html, este filtro solo
+    procesa el parámetro en el queryset."""
+    title = 'Fecha exacta'
+    parameter_name = 'fecha_exacta'
+
+    def lookups(self, request, model_admin):
+        return []
+
+    def has_output(self):
+        # Mostrar solo si hay un valor activo, para que aparezca el chip
+        # de filtro activo en Jazzmin.
+        return bool(self.used_parameters.get(self.parameter_name))
+
+    def queryset(self, request, queryset):
+        from django.utils import timezone as tz
+        from datetime import datetime, time
+        valor = self.value()
+        if valor:
+            try:
+                fecha = datetime.strptime(valor, '%Y-%m-%d').date()
+                inicio_dia = tz.make_aware(datetime.combine(fecha, time.min))
+                fin_dia = tz.make_aware(datetime.combine(fecha, time.max))
+                return queryset.filter(
+                    fecha_hora_inicio__gte=inicio_dia,
+                    fecha_hora_inicio__lte=fin_dia,
+                )
+            except ValueError:
+                pass
+        return queryset
+
+
 class ReservaClaseAdmin(admin.ModelAdmin):
-    form = ReservaClaseAdminForm  # Incluye validación de solapamiento de horarios
-    list_display = ('laboratorio', 'profesor', 'materia', 'fecha_hora_inicio', 'fecha_hora_fin', 'serie')
+    form = ReservaClaseAdminForm
+    change_list_template = 'admin/gestion/reservaclase/change_list.html'
+    list_display = ('get_tipo_badge', 'laboratorio', 'profesor', 'materia', 'fecha_hora_inicio', 'fecha_hora_fin')
     list_filter = (
-        'laboratorio', 
-        'serie',
+        'tipo_evento',
+        'laboratorio',
         'profesor',
         'materia',
-        ('fecha_hora_inicio', admin.DateFieldListFilter),
+        FechaExactaFilter,
     )
-    search_fields = ('profesor', 'materia', 'laboratorio__nombre', 'serie__nombre')
-    date_hierarchy = 'fecha_hora_inicio'
+    search_fields = ('profesor', 'materia', 'laboratorio__nombre', 'serie__nombre', 'nota')
     ordering = ('-fecha_hora_inicio',)
     
     # Fieldsets: oculta 'serie' del formulario manual (reservas individuales son independientes)
     fieldsets = (
-        ('Informacion General', {
-            'fields': ('laboratorio', 'profesor', 'materia', 'color', 'nota', 'carrera', 'semestre', 'numero_alumnos')
+        ('Información General', {
+            'fields': ('laboratorio', 'tipo_evento', 'profesor', 'materia', 'color', 'nota', 'carrera', 'semestre', 'numero_alumnos')
         }),
         ('Horarios', {
             'fields': ('fecha_hora_inicio', 'fecha_hora_fin')
         }),
     )
-    
+
+    def get_tipo_badge(self, obj):
+        """Retorna un badge HTML con color según el tipo de evento."""
+        if not obj.tipo_evento:
+            return format_html('<span style="color:#999;">-</span>')
+        
+        # Color hex que viene del modelo dinámico
+        color_fondo = obj.tipo_evento.color or '#667eea'
+        label = obj.tipo_evento.nombre
+        
+        # Blanco sobre el color seleccionado
+        return format_html(
+            '<span style="background:{};color:#fff;padding:3px 10px;border-radius:12px;'
+            'font-size:12px;font-weight:600;white-space:nowrap;">{}</span>',
+            color_fondo, label
+        )
+    get_tipo_badge.short_description = 'Tipo'
+    get_tipo_badge.admin_order_field = 'tipo_evento'
+
     def get_queryset(self, request):
         """Optimizar consultas para evitar N+1 queries"""
         qs = super().get_queryset(request)
@@ -608,7 +659,7 @@ class SerieReservaAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Información General', {
-            'fields': ('nombre', 'laboratorio', 'profesor', 'materia', 'color', 'carrera', 'semestre', 'numero_alumnos')
+            'fields': ('nombre', 'laboratorio', 'tipo_evento', 'profesor', 'materia', 'color', 'carrera', 'semestre', 'numero_alumnos')
         }),
         ('Horarios y Fechas', {
             'fields': ('fecha_inicio', 'fecha_fin', 'hora_inicio', 'hora_fin')
@@ -788,6 +839,7 @@ class SerieReservaAdmin(admin.ModelAdmin):
                     ReservaClase.objects.create(
                         serie=serie,
                         laboratorio=serie.laboratorio,
+                        tipo_evento=serie.tipo_evento,
                         profesor=serie.profesor,
                         materia=serie.materia,
                         fecha_hora_inicio=fecha_hora_inicio,
@@ -823,7 +875,27 @@ class DiaSemanaAdmin(admin.ModelAdmin):
             orden_dia=Case(*when_conditions, default=99, output_field=IntegerField())
         ).order_by('orden_dia')
 
+class TipoEventoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'color_badge')
+    search_fields = ('nombre',)
+    ordering = ('nombre',)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        """Use color picker widget for color field"""
+        if db_field.name == 'color':
+            kwargs['widget'] = ColorPickerWidget()
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def color_badge(self, obj):
+        return format_html(
+            '<span style="background:{};color:#fff;padding:3px 10px;border-radius:12px;'
+            'font-size:12px;font-weight:600;">{}</span>',
+            obj.color, obj.color
+        )
+    color_badge.short_description = 'Color'
+
 # --- Registramos todos los modelos con sus clases personalizadas ---
+admin.site.register(TipoEvento, TipoEventoAdmin)
 admin.site.register(Carrera, CarreraAdmin)
 admin.site.register(Laboratorio, LaboratorioAdmin)
 admin.site.register(Software, SoftwareAdmin)

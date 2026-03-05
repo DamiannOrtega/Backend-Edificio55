@@ -1,0 +1,45 @@
+{% load i18n %}
+{% with current=spec.used_parameters.fecha_exacta|default:'' %}
+<div class="form-group" style="margin-bottom:0;">
+    <label style="font-size:12px;font-weight:600;color:#6c757d;margin-bottom:4px;display:block;">
+        📅 Filtrar por fecha
+    </label>
+    <input type="date" id="fecha-exacta-picker" value="{{ current }}" class="form-control form-control-sm"
+        style="margin-bottom:6px;">
+    <div class="d-flex gap-1">
+        <button type="button" class="btn btn-sm btn-primary flex-grow-1" onclick="aplicarFechaFiltro()">Filtrar</button>
+        {% if current %}
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="quitarFechaFiltro()"
+            title="Quitar filtro de fecha">✕</button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    (function () {
+        function aplicarFechaFiltro() {
+            var fecha = document.getElementById('fecha-exacta-picker').value;
+            var params = new URLSearchParams(window.location.search);
+            if (fecha) { params.set('fecha_exacta', fecha); }
+            else { params.delete('fecha_exacta'); }
+            params.delete('p');
+            window.location.search = params.toString();
+        }
+        function quitarFechaFiltro() {
+            var params = new URLSearchParams(window.location.search);
+            params.delete('fecha_exacta');
+            params.delete('p');
+            window.location.search = params.toString();
+        }
+        window.aplicarFechaFiltro = aplicarFechaFiltro;
+        window.quitarFechaFiltro = quitarFechaFiltro;
+
+        var input = document.getElementById('fecha-exacta-picker');
+        if (input) {
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') aplicarFechaFiltro();
+            });
+        }
+    })();
+</script>
+{% endwith %}
