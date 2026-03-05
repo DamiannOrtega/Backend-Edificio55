@@ -541,14 +541,16 @@ class ReservaClaseAdmin(admin.ModelAdmin):
             day_date = week_start + timedelta(days=i)
             day_reservations = defaultdict(list)
             
-            # Get reservations for this day
-            day_reservas = [r for r in reservas if r.fecha_hora_inicio.date() == day_date]
+            # Get reservations for this day (convert to local timezone to compare dates correctly)
+            day_reservas = [r for r in reservas if timezone.localtime(r.fecha_hora_inicio).date() == day_date]
             
             # Organize reservations by hour slot
             for reserva in day_reservas:
-                # Get the hour of the reservation start time (in local time)
-                start_hour = reserva.fecha_hora_inicio.astimezone().hour
-                end_hour = reserva.fecha_hora_fin.astimezone().hour
+                # Get the hour of the reservation start time (in local Django timezone)
+                local_inicio = timezone.localtime(reserva.fecha_hora_inicio)
+                local_fin = timezone.localtime(reserva.fecha_hora_fin)
+                start_hour = local_inicio.hour
+                end_hour = local_fin.hour
                 
                 # Add reservation to all hour slots it spans
                 for hour in range(start_hour, end_hour):
