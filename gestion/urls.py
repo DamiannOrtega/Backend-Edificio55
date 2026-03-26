@@ -48,6 +48,7 @@ urlpatterns = [
     path('api/reservations/list-carreras/', views_reservations.api_reservations_list_carreras, name='api_reservations_list_carreras'),
     path('api/reservations/list-semestres/', views_reservations.api_reservations_list_semestres, name='api_reservations_list_semestres'),
     path('api/reservations/list-laboratorios/', views_reservations.api_reservations_list_laboratorios, name='api_reservations_list_laboratorios'),
+    path('api/reservations/occupancy/', views_reservations.api_reservations_occupancy, name='api_reservations_occupancy'),
     
     # Panel Vespertino
     path('panel-vespertino/', views_panel_vespertino.panel_vespertino_home, name='panel_vespertino_home'),

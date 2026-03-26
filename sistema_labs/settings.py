@@ -140,11 +140,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Permitir conexiones desde el servidor de desarrollo de React (Vite)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+
 
 # settings.py (al final del archivo)
 
@@ -222,19 +218,8 @@ JAZZMIN_SETTINGS = {
     }
 }
 
-# CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
-CORS_ALLOW_CREDENTIALS = True
-
-# IMPORTANTE: Solo permitir localhost para desarrollo local
-# Cambiar a False en producción y especificar orígenes permitidos arriba
-CORS_ALLOW_ALL_ORIGINS = False  # Cambiado a False por seguridad
+# CORS: permitir cualquier origen en la red local (sistema interno)
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_HEADERS = [
     'accept',
