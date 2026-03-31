@@ -301,7 +301,7 @@ def api_reservations_list_laboratorios(request):
     """API para obtener lista de todos los laboratorios"""
     
     try:
-        laboratorios = Laboratorio.objects.all().order_by('nombre').values('id', 'nombre')
+        laboratorios = Laboratorio.objects.filter(activo=True).order_by('nombre').values('id', 'nombre')
         
         return JsonResponse({'laboratories': list(laboratorios)})
         
@@ -327,8 +327,10 @@ def api_reservations_occupancy(request):
         date_from_str = request.GET.get('date_from')
         date_to_str   = request.GET.get('date_to')
         laboratory    = request.GET.get('laboratory', 'all')
+        carrera       = request.GET.get('carrera', 'all')
+        semestre      = request.GET.get('semestre', 'all')
         group_by      = request.GET.get('group_by', 'week')   # 'week' | 'month'
-        hours_per_day = float(request.GET.get('hours_per_day', 8))
+        hours_per_day = float(request.GET.get('hours_per_day', 14))  # 7am–9pm = 14 h/día
 
         # ---- Validar fechas ----
         if not date_from_str or not date_to_str:
@@ -342,7 +344,7 @@ def api_reservations_occupancy(request):
 
         # ---- Cuántos laboratorios se consideran para las horas disponibles ----
         if laboratory == 'all':
-            num_labs = Laboratorio.objects.count() or 1
+            num_labs = Laboratorio.objects.filter(activo=True).count() or 1
         else:
             num_labs = 1
 
@@ -353,6 +355,10 @@ def api_reservations_occupancy(request):
         )
         if laboratory != 'all':
             filters &= Q(laboratorio__id=laboratory)
+        if carrera != 'all':
+            filters &= Q(carrera=carrera)
+        if semestre != 'all':
+            filters &= Q(semestre=int(semestre))
 
         reservas = ReservaClase.objects.filter(filters).values(
             'fecha_hora_inicio', 'fecha_hora_fin'

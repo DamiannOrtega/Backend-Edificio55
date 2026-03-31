@@ -153,8 +153,8 @@ def pagina_registro(request):
             fecha_hora_fin__gte=ahora
         ).values_list('laboratorio__id', flat=True)
 
-        # Pedimos a la base de datos todos los laboratorios, EXCEPTO los que están en la lista de ocupados
-        labs_disponibles = Laboratorio.objects.exclude(id__in=list(labs_ocupados))
+        # Pedimos a la base de datos todos los laboratorios activos, EXCEPTO los que están ocupados
+        labs_disponibles = Laboratorio.objects.filter(activo=True).exclude(id__in=list(labs_ocupados))
 
         todo_el_software = Software.objects.all()
         contexto = {
@@ -190,7 +190,8 @@ def opciones_dinamicas(request):
             software = Software.objects.get(id=software_id)
             labs_con_software = software.laboratorios.all()
             labs_disponibles = list(
-                labs_con_software.exclude(id__in=ids_labs_ocupados)
+                labs_con_software.filter(activo=True)
+                                 .exclude(id__in=ids_labs_ocupados)
                                  .order_by('nombre')
                                  .values('id', 'nombre')
             )
@@ -205,7 +206,8 @@ def opciones_dinamicas(request):
             pass
     else: # Carga inicial de la página
         labs_disponibles = list(
-            Laboratorio.objects.exclude(id__in=ids_labs_ocupados)
+            Laboratorio.objects.filter(activo=True)
+                             .exclude(id__in=ids_labs_ocupados)
                              .order_by('nombre')
                              .values('id', 'nombre')
         )
@@ -677,9 +679,9 @@ def api_reports_lab_usage(request):
         
         # Obtener laboratorios con sus estadísticas
         if laboratory != 'all':
-            labs = Laboratorio.objects.filter(id=laboratory)
+            labs = Laboratorio.objects.filter(id=laboratory, activo=True)
         else:
-            labs = Laboratorio.objects.all()
+            labs = Laboratorio.objects.filter(activo=True)
         
         data = []
         for lab in labs:

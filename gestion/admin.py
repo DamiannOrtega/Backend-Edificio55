@@ -1,4 +1,4 @@
-﻿from django.contrib import admin
+from django.contrib import admin
 from .models import Laboratorio, Software, PC, Estudiante, ReservaClase, Visita, SerieReserva, DiaSemana, Mantenimiento, SesionActiva, CalendarioSemanal, Carrera, TipoEvento
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
@@ -120,13 +120,16 @@ class LaboratorioAdmin(admin.ModelAdmin):
     inlines = [PCInline, SoftwareInline]
 
     # 2. Mejora las columnas que se muestran en la lista
-    list_display = ('nombre', 'get_pc_count', 'get_software_count')
+    list_display = ('nombre', 'activo', 'get_pc_count', 'get_software_count')
+
+    # Permite marcar/desmarcar "activo" directamente desde la lista
+    list_editable = ('activo',)
 
     # 3. Añade una barra de búsqueda
     search_fields = ('nombre', 'descripcion')
 
-    # 4. Añade un filtro por descripción (si no está vacía)
-    list_filter = ('descripcion',)
+    # 4. Filtro por activo
+    list_filter = ('activo',)
 
     # Esta función cuenta las PCs en cada laboratorio
     def get_pc_count(self, obj):

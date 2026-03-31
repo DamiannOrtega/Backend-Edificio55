@@ -6,10 +6,14 @@ from datetime import datetime, timedelta
 class Laboratorio(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField(blank=True, null=True)
-    
+    activo = models.BooleanField(
+        default=True,
+        help_text="Desmarcar para excluir este laboratorio de las estadísticas y del calendario de reservas."
+    )
+
     class Meta:
         ordering = ['nombre']
-    
+
     def __str__(self):
         return self.nombre
 
