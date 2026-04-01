@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/reports/top-users/', views.api_reports_top_users, name='api_reports_top_users'),
     path('api/reports/laboratories-list/', views.api_reports_laboratories_list, name='api_reports_laboratories_list'),
     path('api/reports/software-list/', views.api_reports_software_list, name='api_reports_software_list'),
+    path('api/reports/visits-hours/', views.api_reports_visits_hours, name='api_reports_visits_hours'),
     
     # APIs para exportación
     path('api/export/pdf/', views.api_export_pdf, name='api_export_pdf'),

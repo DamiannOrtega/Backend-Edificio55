@@ -878,6 +878,116 @@ def api_reports_software_list(request):
         return JsonResponse({'error': str(e), 'data': []})
 
 
+@csrf_exempt
+@admin_required_api
+def api_reports_visits_hours(request):
+    """
+    API para calcular horas de uso por visitas de alumnos, agrupadas por período.
+
+    Parámetros:
+        date_from   : fecha inicio (YYYY-MM-DD)
+        date_to     : fecha fin    (YYYY-MM-DD)
+        laboratory  : id del lab o 'all'
+        group_by    : 'week' | 'month'
+    """
+    from datetime import datetime, date, timedelta
+
+    try:
+        date_from_str = request.GET.get('date_from')
+        date_to_str   = request.GET.get('date_to')
+        laboratory    = request.GET.get('laboratory', 'all')
+        group_by      = request.GET.get('group_by', 'week')
+
+        # ---- Fechas por defecto: último mes ----
+        today = date.today()
+        if date_from_str and date_to_str:
+            date_from_obj = datetime.strptime(date_from_str, '%Y-%m-%d').date()
+            date_to_obj   = datetime.strptime(date_to_str,   '%Y-%m-%d').date()
+        else:
+            date_to_obj   = today
+            date_from_obj = today.replace(day=1)
+
+        # ---- Filtrar visitas completadas en el rango ----
+        filters = Q(
+            fecha_hora_inicio__date__gte=date_from_obj,
+            fecha_hora_inicio__date__lte=date_to_obj,
+            fecha_hora_fin__isnull=False,   # Solo visitas finalizadas
+        )
+        if laboratory != 'all':
+            filters &= Q(pc__laboratorio__id=laboratory)
+
+        visitas = Visita.objects.filter(filters).values(
+            'fecha_hora_inicio', 'fecha_hora_fin'
+        )
+
+        # ---- Acumular horas por período ----
+        horas_por_periodo = {}
+
+        for v in visitas:
+            inicio = timezone.localtime(v['fecha_hora_inicio'])
+            fin    = timezone.localtime(v['fecha_hora_fin'])
+            dur_h  = (fin - inicio).total_seconds() / 3600.0
+
+            d = inicio.date()
+            if group_by == 'month':
+                key = d.strftime('%Y-%m')
+            else:  # week
+                iso_year, iso_week, _ = d.isocalendar()
+                key = f'{iso_year}-W{iso_week:02d}'
+
+            horas_por_periodo[key] = horas_por_periodo.get(key, 0.0) + dur_h
+
+        # ---- Generar lista de períodos en el rango ----
+        periodos = []
+        seen = set()
+        cursor = date_from_obj
+
+        while cursor <= date_to_obj:
+            if group_by == 'month':
+                key       = cursor.strftime('%Y-%m')
+                label_str = cursor.strftime('%b %Y')
+                if cursor.month == 12:
+                    cursor = date(cursor.year + 1, 1, 1)
+                else:
+                    cursor = date(cursor.year, cursor.month + 1, 1)
+            else:  # week
+                iso_year, iso_week, iso_dow = cursor.isocalendar()
+                key = f'{iso_year}-W{iso_week:02d}'
+                week_start = cursor - timedelta(days=iso_dow - 1)
+                week_end   = week_start + timedelta(days=6)
+                label_str  = f'Sem. {iso_week} ({week_start.strftime("%d %b")}–{week_end.strftime("%d %b")})'
+                cursor = week_start + timedelta(days=7)
+
+            if key in seen:
+                continue
+            seen.add(key)
+
+            horas = round(horas_por_periodo.get(key, 0.0), 2)
+            periodos.append({
+                'periodo': key,
+                'label':   label_str,
+                'horas':   horas,
+            })
+
+        # ---- Totales ----
+        total_horas   = round(sum(p['horas'] for p in periodos), 2)
+        total_visitas = Visita.objects.filter(filters).count()
+
+        return JsonResponse({
+            'periodos': periodos,
+            'totales': {
+                'horas_totales':  total_horas,
+                'total_visitas':  total_visitas,
+                'promedio_horas': round(total_horas / total_visitas, 2) if total_visitas > 0 else 0,
+            }
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': str(e), 'periodos': [], 'totales': {}}, status=500)
+
+
 # APIs para exportación de reportes
 @csrf_exempt
 @admin_required_api
