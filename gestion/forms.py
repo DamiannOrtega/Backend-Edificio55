@@ -123,9 +123,9 @@ class ReservaClaseAdminForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'vTextField'}),
         label='Carrera'
     )
-    semestre = forms.CharField(
+    semestre = forms.IntegerField(
         required=False,
-        widget=forms.TextInput(attrs={'class': 'vTextField'}),
+        widget=forms.NumberInput(attrs={'class': 'vTextField'}),
         label='Semestre'
     )
     numero_alumnos = forms.IntegerField(
